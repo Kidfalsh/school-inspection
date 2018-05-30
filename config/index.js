@@ -32,7 +32,7 @@ module.exports = {
         target:'http://www.theflashdye.com',
         changeOrigin:true,
         pathRewrite:{
-          '/api':''
+          '^/api':'/'
         }
       }
     },
