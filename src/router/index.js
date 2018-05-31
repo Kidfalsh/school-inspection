@@ -53,6 +53,12 @@ const symptomStudentReport = resolve => {
 const analysis = resolve => {
   require(['../components/analysis/analysis.vue'], resolve)
 };
+const changePassword = resolve => {
+  require(['../components/changePassword/changePassword.vue'], resolve)
+};
+const forgetPassword = resolve => {
+  require(['../components/forgetPassword/forgetPassword.vue'], resolve)
+};
 // auto add components
 
 export const CommonRoutes = [{
@@ -155,8 +161,18 @@ export const AsyncRoutes = [{
       name: 'analysis',
       path: '/index/analysis',
       component: analysis
-    }// auto add routePath
-  ,{ path: '*', redirect: '/index' }
+    },
+    {
+      name: 'changePassword',
+      path: '/index/changePassword',
+      component: changePassword
+    },
+    {
+      name: 'forgetPassword',
+      path: '/index/forgetPassword',
+      component: forgetPassword
+    },// auto add routePath
+    { path: '*', redirect: '/index' }
 ]
 
 

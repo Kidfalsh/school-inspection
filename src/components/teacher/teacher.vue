@@ -1,7 +1,7 @@
 
 <template>
   <div>
-    <my-header :leftShow="false"></my-header>
+    <my-header :leftShow="false" :isTeacher="true"></my-header>
     <my-swipe></my-swipe>
     <div class="contain">
       <div class="contain-item" v-for="item in itemList"  @click="toTarget(item)">

@@ -106,7 +106,11 @@ export default {
   approvalByTeacher(params) {
     return fetch('/rest/commitData/020201/05', params);
   },
-
+  //密码修改/重置
+  changePassword(params) {
+    return fetch('/rest/commitData/080902/4', params);
+  },
+  
 
   
   //查询单个学生的请假记录

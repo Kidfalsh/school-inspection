@@ -121,12 +121,6 @@ export default {
           var myChart = echarts.init(document.getElementById('echartContainer'))
           // 绘制学生状况分布图表 
           myChart.setOption({
-            globe: {
-              show:true,
-              globeRadius: 100,
-              globeOuterRadius: 150,
-              environment: 'auto',
-            },
             title: {
               text: '当日学生状况分布图',
               x: 'center',

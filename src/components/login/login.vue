@@ -14,9 +14,11 @@
         <input v-model="userInfo.password" placeholder="请输入密码" type="password">
       </div>
       <div class="btn-wrap"> 
-        <div class="login_btn" @click="submit"> 登录</div>
-        <div class="register_btn" @click="register" v-if="!isTeacher">注册</div>
+        <div class="login_btn" @click.stop="submit"> 登录</div>
+        <div class="register_btn" @click.stop="register" v-if="!isTeacher">注册</div>
+        <div class="register_btn1" @click.stop="forgetPassword" v-if="!isTeacher">忘记密码</div>
       </div>
+
     </div>
   </div>
 </template>
@@ -38,7 +40,6 @@ export default {
   computed: {},
   created() {
     this.$store.commit("setPageTitle", "用户登录");
-    console.log(this.$route.query)
     this.flag = this.$route.query.flag
     if(this.flag == 'teacher'){
       this.isTeacher=true
@@ -71,6 +72,11 @@ export default {
     register() {
       this.$router.push({
         name:'register',
+      })
+    },
+    forgetPassword(){
+      this.$router.push({
+        name:'forgetPassword'
       })
     }
   },
@@ -133,6 +139,16 @@ input {
   box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.2);
 }
 .btn-wrap .register_btn {
+  width:30%;
+  display: inline-block;
+  margin-top: 15px;
+  margin-left:15%;
+  margin-right:5%;
+  color: #666;
+}
+.btn-wrap .register_btn1 {
+  width:30%;
+  display: inline-block;
   margin-top: 15px;
   color: #666;
 }

@@ -1,8 +1,17 @@
 
 <template>
   <div>
-    <my-header :leftShow="false"></my-header>
+    <my-header :leftShow="false" @showMore="showMore" :isTeacher="false"></my-header>
     <my-swipe></my-swipe>
+    <!-- 显示注销 修改密码 -->
+    <div v-if="moreShow" class="child-wrap" @click.stop="closeMore">
+      <div class="child-list">
+        <div  class="child-item">
+          <a @click.stop="Cancellation" >注销</a>
+          <a @click.stop="changePassword"  >修改密码</a>
+        </div>
+      </div>
+    </div>
     <div class="contain">
       <div class="contain-item" v-for="item in itemList"  @click="toTarget(item)">
         <span class="badge" v-if="item.baddge && !!count">{{count}}</span>
@@ -37,7 +46,7 @@
 <script type="text/javascript">
 import mySwipe from "@/components/mySwipe/mySwipe.vue";
 import myHeader from "@/components/header/header.vue";
-
+import { setLocal } from "../../util/util";
 export default {
   data() {
     return {
@@ -50,7 +59,8 @@ export default {
         
       ],
       
-      xxid:''
+      xxid:'',
+      moreShow:false,
     };
   },
   computed: {},
@@ -62,6 +72,34 @@ export default {
     this.loadArticleList()
   },
   methods: {
+    //显示下拉选择 --注销 修改密码
+    showMore(){
+      this.moreShow = true
+    },
+    closeMore(){
+      this.moreShow=false
+    },
+    clearLocal() {
+      setLocal('parent_flag', null);
+      setLocal('teacher_flag', null);
+    },
+    Cancellation() {
+      this.clearLocal();
+      console.log(location)
+      location.href=location.origin + location.pathname
+      // this.$router.push({
+      //   name: "login"
+      // });
+    },
+    //修改密码
+    changePassword(){
+      this.$router.push({
+        name:"changePassword",
+        query:{
+
+        }
+      })
+    },
     toTarget(data) {
       if (data.target) {
         this.$router.push({
@@ -215,5 +253,59 @@ export default {
   width: 100%;
   border-top: 1px solid #dcdcdc;
   transform: scaleY(0.5);
+}
+.child-wrap {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+}
+.child-list {
+  position: absolute;
+  right: 0px;
+  border-radius: 5px;
+  top: 40px;
+  width: 60px;
+  min-height: 50px;
+  background: #fff;
+}
+.child-list:after {
+  content: "";
+  position: absolute;
+  right: 10px;
+  top: -19px;
+  height: 0;
+  width: 0;
+  border: 10px solid transparent;
+  border-bottom-color: #fff;
+}
+.child-list .child-item {
+  position: relative;
+  /* display: flex; */
+  width: 100%;
+  height: 40px;
+  margin: auto;
+}
+.child-item:after {
+  position: absolute;
+  content: "";
+  height: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  /* border-bottom: 1px solid #dcdcdc; */
+  transform: scaleY(0.5);
+}
+.child-item a{
+  display:block;
+  width:100%;
+  height:25px;
+  font-size: 12px;
+  line-height: 25px;
+  text-align: center;
 }
 </style>

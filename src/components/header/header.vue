@@ -5,7 +5,8 @@
       <a @click="toBack" slot="left" v-if="leftShow">
         <mt-button icon="back" >返回</mt-button>
       </a>
-      <a @click="Cancellation"  slot="right" v-if="!leftShow">注销</a>
+      <a @click="Cancellation" slot="right" v-if="!leftShow&&isTeacher" >注销</a>
+      <mt-button icon="more" slot="right"  v-if="!leftShow&&!isTeacher"  @click.stop="showChoose"></mt-button>
     </mt-header>
   </div>
 </template>
@@ -22,9 +23,14 @@ export default {
       type: Boolean,
       default: true
     },
+    isTeacher:{
+      type: Boolean,
+    }
   },
   data() {
-    return {};
+    return {
+      chooseShow:false
+    };
   },
   computed: {},
   created() {},
@@ -44,6 +50,9 @@ export default {
     },
     toBack() {
       this.$router.back();
+    },
+    showChoose(){
+      this.$emit('showMore')
     }
   },
   components: {}
@@ -51,5 +60,6 @@ export default {
 </script>
 
 <style  scoped>
+  
 
 </style>

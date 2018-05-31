@@ -7,7 +7,7 @@
     <div class="form">
       <div class="form-item">
         <icon style="color:#333;height:45px;width:18px;"  name="user"></icon>
-        <input v-model="userInfo.username" placeholder="请输入注册用户名(手机号)" type="text">
+        <input v-model="userInfo.sjhm" placeholder="请输入注册的手机号" type="text">
       </div>
       <!-- 手机验证码 -->
       <div class="form-item" style="margin-top:15px">
@@ -24,11 +24,11 @@
       </div>
       <div class="form-item" style="margin-top:15px">
         <icon style="color:#333;height:45px;width:18px;" name="password"></icon>
-        <input v-model="userInfo.password" placeholder="请输入密码" type="password">
+        <input v-model="userInfo.password" placeholder="请输入重置密码" type="password">
       </div>
       <div class="form-item" style="margin-top:15px">
         <icon style="color:#333;height:45px;width:18px;" name="password"></icon>
-        <input v-model="userInfo.repeatPassword" placeholder="请再次输入密码" type="password">
+        <input v-model="userInfo.repeatPassword" placeholder="请确认密码" type="password">
       </div>
       <div class="btn-wrap"> 
         <div class="register_btn" @click="submit"> 确认</div>
@@ -45,7 +45,7 @@ export default {
   data() {
     return {
       userInfo: {
-        username: "",
+        sjhm: "",
         password: "",
         repeatPassword: "",
         code: ""
@@ -70,16 +70,17 @@ export default {
   },
   methods: {
     sendCode() {
-      if (this.userInfo.username.length != 11 || this.userInfo.username.charAt(0) != 1) {
+        console.log(this.userInfo.sjhm)
+      if (this.userInfo.sjhm.length!= 11 || this.userInfo.sjhm.charAt(0)!= 1) {
         this.$toast('请输入正确的手机号！')
         return;
       }else{
         this.isSend = true;
         let number = this.randomNumber()
-        var msg=`您正在注册杭州市学校症状监测系统，验证码【${number}】请在15分钟内按页面提示输入验证码，切勿将验证码泄露与他人。`   
+        var msg=`您正在使用杭州市学校症状监测系统，修改密码验证码为【${number}】请在15分钟内按页面提示输入验证码，切勿将验证码泄露与他人。`   
         this.nextTime();
         let params={
-          sjhm:this.userInfo.username,
+          sjhm:this.userInfo.sjhm,
           msg:msg
         }
         params = Base64.encode(JSON.stringify(params))
@@ -116,7 +117,7 @@ export default {
       }, 1000)
     },
     checkUserInfo() {
-      if (!this.userInfo.username || !this.userInfo.password 
+      if (!this.userInfo.sjhm || !this.userInfo.password 
       || !this.userInfo.repeatPassword) {
         this.$toast("信息填写不完整");
         return false;
@@ -136,28 +137,23 @@ export default {
     },
     register() {
       let param = {
-        sjhm: this.userInfo.username,
+        sjhm: this.userInfo.sjhm,
         mm: md5(this.userInfo.password)
       }
-      this.api.register(param).then(res => {
+      this.api.changePassword(param).then(res => {
         if (res.code == '1') {
-          this.$toast('注册成功!');
-          this.$router.back();
-        } else {
-          this.$toast('注册失败!'+res.msg)
-          if(res.msg=='该手机号码已注册！'){
-            this.$router.push({
-              name:'login',
+          this.$toast('密码重置成功!');
+          var _this = this //setTimeout 里面的this 为全局
+          setTimeout(function(){
+			_this.$router.push({
+              name: "login",
               query: {
                 flag:'parent'
               }
-            })
-          }
-          /* if (res.msg.indexOf('unique constraint') != '-1') {
-            this.$toast(`注册失败, 该号码已注册!`)
-          } else {
-            this.$toast(`注册失败!`)
-          } */
+            });
+		  },2000);
+        } else {
+          this.$toast(res.msg)
         }
       }).catch(err => {
         this.$toast(err);
