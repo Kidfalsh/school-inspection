@@ -20,7 +20,7 @@ const store = new Vuex.Store({
       userInfo: {}, // 用户登录信息
       roles:[], // 角色权限
       rybz:'',  // 首次进入选择是家长还是教务人员，然后生成对应的路由表
-      addRouters: []
+      addRouters: [],
     },
     mutations: {
         setRoutes: (state, routers) => {
@@ -51,7 +51,7 @@ const store = new Vuex.Store({
         set_rybz(state, value = 'parent') {
           state.rybz = value;
           setLocal('rybz', value)
-        }
+        },
     },
     getters: {
         loading(state) {

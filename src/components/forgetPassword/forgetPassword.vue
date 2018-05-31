@@ -12,7 +12,7 @@
       <!-- 手机验证码 -->
       <div class="form-item" style="margin-top:15px">
         <div>
-          <icon style="color:#333;height:45px;width:18px;" name="code" :class="userInfo.code==number&& 'selected'"></icon>
+          <icon style="color:#333;height:45px;width:18px;" name="code"></icon>
         </div>
         <div>
            <input style="width:100px" v-model="userInfo.code" placeholder="请输入验证码" type="number">
@@ -24,11 +24,11 @@
       </div>
       <div class="form-item" style="margin-top:15px">
         <icon style="color:#333;height:45px;width:18px;" name="password"></icon>
-        <input v-model="userInfo.password" placeholder="请输入重置密码" type="password">
+        <input v-model="userInfo.password" placeholder="请输入新密码" type="password">
       </div>
       <div class="form-item" style="margin-top:15px">
         <icon style="color:#333;height:45px;width:18px;" name="password"></icon>
-        <input v-model="userInfo.repeatPassword" placeholder="请确认密码" type="password">
+        <input v-model="userInfo.repeatPassword" placeholder="请确认新密码" type="password">
       </div>
       <div class="btn-wrap"> 
         <div class="register_btn" @click="submit"> 确认</div>
@@ -41,6 +41,7 @@
 import md5 from 'js-md5'
 import axios from 'axios';
 let Base64 = require('js-base64').Base64;
+import { setLocal } from "../../util/util";
 export default {
   data() {
     return {
@@ -57,7 +58,7 @@ export default {
     };
   },
   created() {
-    this.$store.commit("setPageTitle", "用户注册");
+    this.$store.commit("setPageTitle", "忘记密码");
   },
   watch:{
     'userInfo.code'(val){
@@ -135,6 +136,10 @@ export default {
       }
       return true;
     },
+    clearLocal() {
+      setLocal('parent_flag', null);
+      setLocal('teacher_flag', null);
+    },
     register() {
       let param = {
         sjhm: this.userInfo.sjhm,
@@ -143,6 +148,7 @@ export default {
       this.api.changePassword(param).then(res => {
         if (res.code == '1') {
           this.$toast('密码重置成功!');
+          this.clearLocal()
           var _this = this //setTimeout 里面的this 为全局
           setTimeout(function(){
 			_this.$router.push({

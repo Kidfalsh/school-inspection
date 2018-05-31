@@ -13,7 +13,7 @@
       </div>
     </div>
     <div class="contain">
-      <div class="contain-item" v-for="item in itemList"  @click="toTarget(item)">
+      <div class="contain-item" v-for="item in itemList"  @click.stop="toTarget(item)">
         <span class="badge" v-if="item.baddge && !!count">{{count}}</span>
         <img :src="item.src" alt="">
       </div>
@@ -141,12 +141,16 @@ export default {
       })
     },
     toArticle(item){
-      this.$router.push({
-        path: "articlePage",
-        query: {
-          id: item.id
-        }
-      });
+      if(this.moreShow==true){
+        this.moreShow=false
+      }else{
+        this.$router.push({
+          path: "articlePage",
+          query: {
+            id: item.id
+          }
+        });
+      }
     },
   },
   components: {
@@ -262,7 +266,7 @@ export default {
   right: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.3);
 }
 .child-list {
   position: absolute;
@@ -277,10 +281,10 @@ export default {
   content: "";
   position: absolute;
   right: 10px;
-  top: -19px;
+  top: -9px;
   height: 0;
   width: 0;
-  border: 10px solid transparent;
+  border: 5px solid transparent;
   border-bottom-color: #fff;
 }
 .child-list .child-item {
@@ -307,5 +311,10 @@ export default {
   font-size: 12px;
   line-height: 25px;
   text-align: center;
+}
+.child-item a:first-child{
+  border-bottom: 1px solid #dcdcdc;
+  position: relative;
+  top:-1px;
 }
 </style>

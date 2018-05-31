@@ -29,6 +29,8 @@
 import md5 from 'js-md5'
 import axios from 'axios';
 let Base64 = require('js-base64').Base64;
+import { setLocal } from "../../util/util";
+import { getLocal } from "../../util/util"
 export default {
   data() {
     return {
@@ -51,12 +53,17 @@ export default {
     checkUserInfo() {
       if(!this.userInfo.pastPassword||!this.userInfo.password||!this.userInfo.repeatPassword){
         this.$toast("信息填写不完整！");
+        return false
       }
       else if (this.userInfo.password  != this.userInfo.repeatPassword) {
         this.$toast("2次密码输入不一致！");
         return false;
       }
       return true;
+    },
+    clearLocal() {
+      setLocal('parent_flag', null);
+      setLocal('teacher_flag', null);
     },
     changePassword() {
       let param = {
@@ -67,8 +74,8 @@ export default {
       }
       this.api.changePassword(param).then(res => {
         if (res.code == '1') {
-          console.log(res)
           this.$toast('密码修改成功!');
+          this.clearLocal()
           var _this = this //setTimeout 里面的this 为全局
           setTimeout(function(){
 						_this.$router.push({
