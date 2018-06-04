@@ -12,6 +12,7 @@
  
 <script type="text/javascript">
 import myHeader from "@/components/header/header.vue";
+
  export default {
    data() {
      return {

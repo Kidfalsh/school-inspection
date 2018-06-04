@@ -59,6 +59,9 @@ const changePassword = resolve => {
 const forgetPassword = resolve => {
   require(['../components/forgetPassword/forgetPassword.vue'], resolve)
 };
+const addLove= resolve => {
+  require(['../components/addLove/addLove.vue'], resolve)
+};
 // auto add components
 
 export const CommonRoutes = [{
@@ -94,6 +97,11 @@ export const CommonRoutes = [{
       name:'test',
       path:'/test',
       component:test
+    },
+    {
+      name:'addLove',
+      path:'/addLove',
+      component: addLove
     },
     {
       name: '404',
