@@ -88,7 +88,7 @@
  const clearLocal = (key) => {
    window.localStorage.removeItem(key)
  }
- export {
+ export{
    checkBrowserBackStr,
    checkBrowser,
    getUrlParams,

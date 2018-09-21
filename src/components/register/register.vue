@@ -18,8 +18,8 @@
            <input style="width:100px" v-model="userInfo.code" placeholder="请输入验证码" type="number">
         </div>
         <div style="width:100px;">
-          <span class="span_btn" v-if="!isSend" @click.stop="sendCode" style="background-color:#17c095">发送验证码</span>
-          <span class="span_btn times_btn" v-if="isSend" style="color:#17c095">{{times}}</span>
+          <span class="span_btn" v-if="!isSend" @click.stop="sendCode" style="background-color:#17c095">获取验证码</span>
+          <span class="span_btn times_btn" v-if="isSend" style="color:#17c095">{{times?times+'s':''}}</span>
         </div>
       </div>
       <div class="form-item" style="margin-top:15px">
@@ -142,6 +142,7 @@ export default {
       this.api.register(param).then(res => {
         if (res.code == '1') {
           this.$toast('注册成功!');
+          this.$store.commit('set_userName', this.userInfo.username);
           this.$router.back();
         } else {
           this.$toast('注册失败!'+res.msg)
@@ -229,12 +230,12 @@ input {
 .span_btn {
   display: inline-block;
   width: 90px;
-  height:30px;
-  line-height: 30px;
-  border-radius: 15px;
+  height:28px;
+  line-height: 28px;
+  border-radius: 14px;
   background:#26a2ff;
   color: #fff;
-  font-size: 13px;
+  font-size: 14px;
 }
 .times_btn {
   background:#dcdcdc;

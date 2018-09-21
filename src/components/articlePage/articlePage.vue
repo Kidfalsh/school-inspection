@@ -20,7 +20,7 @@ export default {
         }
     },
     created() {
-        this.$store.commit("setPageTitle", "文章详情");
+      //this.$store.commit("setPageTitle", "文章详情");
     },
     
     components: {

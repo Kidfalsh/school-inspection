@@ -15,7 +15,7 @@
     </div>
     <div ref="contain" class="contain">
       <div class="wrap leave-info">
-        <div class="form-itme" @click="showSheet('qjlx')">
+        <div class="form-itme">
           <div class="desc">请假类型</div>
           <div class="content" style="flex:1;text-align:right">{{qjdata.qjlx}}</div>
         </div>
@@ -42,6 +42,12 @@
           <div class="desc">是否就诊</div>
           <div class="content" style="flex:1;text-align:right">{{qjdata.sfjz}}</div>
         </div>
+        <!-- 就诊医院 -->
+        <div class="form-itme" v-if="jzyyShow">
+          <div class="desc">就诊医院</div>
+          <!-- <input v-model="qjdata.jzyy"  @focus="setPos"  type="text" placeholder="请输入就诊医院"> -->
+          <div class="content" style="flex:1;text-align:right">{{qjdata.jzyy}}</div>
+        </div>
         <div class="form-itme" v-if="qjdata.sfjz == '是'">
           <div class="desc">医生诊断</div>
           <div class="content" style="flex:1;text-align:right">{{qjdata.yszd}}</div>
@@ -52,6 +58,14 @@
             <span class="box choose" v-for="item,index in qjdata.zz">{{item}}</span>
           </div>
         </div>
+        <!-- 配置体温 -->
+        <div class="form-itme" v-if="twShow">
+          <div class="desc">体温</div>
+          <input v-model="qjdata.tw"  @focus="setPos" style="text-align:right;margin-right:-25px;" type="number" placeholder="请输入体温">
+          <div class="icon" style="width:45px;height:25px;line-height:25px;text-align:center;">
+            ℃
+          </div>
+        </div>
         <div class="form-itme" v-if="qjdata.qtzz">
           <div class="desc">其他症状</div>
           <div class="content" style="flex:1;text-align:right">{{qjdata.qtzz}}</div>
@@ -60,10 +74,20 @@
       <div style="margin:10px 0;height:40px;background:#fff">
         <div class="form-itme">
           <div class="desc">老师反馈</div>
-          <input v-model="bz"  @focus="setPos"  type="text" placeholder="请输入反馈信息">
+          <input v-model="bz"  @focus="setPos" :readonly="bz.length<=0&&'readonly'" type="text" placeholder="请输入反馈信息" @click.stop="showSheet1">
         </div>
       </div>
     </div>
+    <!-- <mt-picker class="picker"  v-if="choiceShow"
+        :slots="slots"  
+        ref="picker" 
+        valueKey="name"
+        @change="changePicker">
+    </mt-picker>  -->
+    <mt-actionsheet
+      :actions="actions"
+      v-model="sheetVisible">
+    </mt-actionsheet>
     <div ref='footer' class="footer">
       <div style="background:#f8c88c" class="button" @click.stop="reject">驳回</div>
       <div style="background:#5dd3a2" class="button" @click.stop="confirm">准假</div>
@@ -73,7 +97,7 @@
 
 <script type="text/javascript">
 import myHeader from "@/components/header/header.vue";
-
+import { Picker } from 'mint-ui';
 export default {
   data() {
     return {
@@ -87,23 +111,41 @@ export default {
         qjyy: '',
         fbrq: '',
         sfjz: '',
+        jzyy:'',//就诊医院
         yszd: '',
         zz:["发热", "呕吐", "咳嗽"],
-        qtzz: ''
+        qtzz: '',
+        tw:''//体温
       },
+      jzyyShow:false,//就诊医院显示
+      twShow:false,//是否显示体温
       bz:'',
       childData:'',
-      id:''
+      id:'',
+      choiceShow:false,
+      slots:[{values: [{name:'请及早带孩子去医院看病。'},{name:'注意保暖，多喝水。'},
+       {name:'多休息，注重营养均衡，提高抵抗力。'},{name:'避免去人多拥挤场所。'}]}],
+      actions:[], 
+      sheetVisible:false,
+      bzlx: [
+        { name: "请及早带孩子去医院看病。", method: this.chooseBzlx },
+        { name: "注意保暖，多喝水。", method: this.chooseBzlx },
+        { name: "多休息，注重营养均衡，提高抵抗力。", method: this.chooseBzlx },
+        { name: "避免去人多拥挤场所。", method: this.chooseBzlx },
+        { name: "不予批准！", method: this.chooseBzlx },
+      ],
+      
     };
   },
   created() {
-    this.$store.commit('setPageTitle','请假条')
+    //this.$store.commit('setPageTitle','请假条')
     let query = this.$route.query;
     this.childData = JSON.parse(decodeURI(query.curData))
     this.id=this.childData.id
     if (query.look) {
       this.look = true;
     }
+    console.log(this.childData)
     this.init(this.childData)
   },
   mounted() {
@@ -128,6 +170,20 @@ export default {
         this.qjdata.sfjz=(data.sfjz=='0'?'否':'是')
         this.qjdata.qtzz=data.qtzz
         this.qjdata.yszd=data.jbzd
+        //就诊医院显示
+        if(data.jzyy){
+          this.jzyyShow = true 
+          this.qjdata.jzyy = data.jzyy
+        }else{
+          this.jzyyShow = false 
+        }
+        //体温显示
+        if(data.tw){
+          this.twShow = true
+          this.qjdata.tw = parseFloat(data.tw).toFixed(1);
+        }else{
+          this.twShow = false 
+        }
         data.zyzz_text&&(this.qjdata.zz=data.zyzz_text.split(","))
       }
       //data.zyzz_text&&(this.setZz(data.zyzz_text.split(",")))
@@ -174,14 +230,6 @@ export default {
     chooseSfjz(data) {
       this.saveData.sfjz = data.name;
     },
-    showSheet(lx) {
-      this.sheetVisible = true;
-      if (lx === "qjlx") {
-        this.actions = this.qjlx;
-      } else if (lx === "sfjz") {
-        this.actions = this.sfjz;
-      }
-    },
     handleConfirm(data) {
       this.saveData[this.current] = data.toLocaleDateString();
     },
@@ -205,6 +253,7 @@ export default {
       }
     },
     setPos(e) {
+      e.preventDefault()
       let pos = e.target.getBoundingClientRect();
       this.focus_top = pos.top;
     },
@@ -212,9 +261,9 @@ export default {
     confirm() {
       let ryxx = this.$store.getters.userInfo.ryxx
       //console.log(ryxx)
-      if(this.bz==""){
-        this.$toast('请填写反馈信息!') 
-      }else{
+      // if(this.bz==""){
+      //   this.$toast('请填写反馈信息!') 
+      // }else{
         //调用接口
         let data = {
           qj_arr:[this.id],
@@ -235,7 +284,7 @@ export default {
           }
         })
         
-      }
+      // }
     },
     //驳回
     reject(){
@@ -257,6 +306,29 @@ export default {
         }
       })
       
+    },
+    showChoice(){
+      if(this.bz==''){
+        document.activeElement.blur()
+        this.choiceShow=!this.choiceShow;
+      }else{
+        return 
+      } 
+    },
+    showSheet1() {
+      if(this.bz==''){
+        this.sheetVisible = true;
+        this.actions = this.bzlx;
+      }else{
+        return 
+      }
+      
+    },
+    chooseBzlx(data){
+      this.bz=data.name
+    },
+    changePicker(picker, values){   
+      this.bz= values[0].name
     }
   },
   components: {
@@ -293,7 +365,7 @@ export default {
   min-height: 140px;
 }
 .footer {
-  position: absolute;
+  position: fixed;
   width: 100%;
   bottom: 0;
   height: 56px;
@@ -328,7 +400,7 @@ input {
   height: 24px;
   padding: 0 5px;
   text-align: right;
-  padding-right: 25px;
+  padding-right:15px;
   flex: 1;
 }
 input:focus {
@@ -374,5 +446,19 @@ input:focus {
 .content {
   padding-right: 15px;
   color: #000;
+}
+.choice{
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 40px;
+  left: 0;
+  z-index: 2;
+}
+.picker{
+  position:absolute;
+  bottom:15%;
+  width:100%;
+  background-color: #fff;
 }
 </style>

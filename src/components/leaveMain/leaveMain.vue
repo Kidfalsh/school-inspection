@@ -3,7 +3,7 @@
   <div>
     <mt-header title="请假记录">
       <a @click="toBack" slot="left">
-        <mt-button icon="back">返回</mt-button>
+        <mt-button slot="left" icon="back">返回</mt-button>
       </a>
       <div class="icon-left" slot="right" @click="add" v-if="childs.length>0">
           <icon  name="add" scale="2"></icon>
@@ -119,7 +119,7 @@ export default {
       return minx / (3600*1000*24);
     },
     addTemporary() {
-      let data = getLocal(`temporary_${this.curChild.xsid}`); 
+      let data = getLocal(`temporary_${this.curChild.xsid}`);
       if (data) {
         let zt_text = ''
         if(data.qjyy=='事假'){
@@ -145,7 +145,7 @@ export default {
           this.childs = res.data;
           this.curChild = res.data[0];
           this.loadQjjl();
-          this.addTemporary();
+          //this.addTemporary();
         } else {
           this.$toast('没有相关学生信息!')
         }
@@ -170,6 +170,7 @@ export default {
             this.zanwu = false
           }
           this.leaveList.push(...res.data) 
+          this.addTemporary();
         }
       },
       err => {

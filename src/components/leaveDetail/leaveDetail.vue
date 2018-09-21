@@ -1,7 +1,7 @@
 
 <template>
   <div style="background:#f0efed">
-    <div class="look-wrap" v-if="look"></div>
+    <!-- <div class="look-wrap" v-if="look"></div> -->
     <my-header :title="title"></my-header>
     <div style="display:flex;width:100%;height:90px;padding-top:10px;background:#fff;box-sizing:border-box;padding-left:25px">
       <div style="width:50px;height:50px">
@@ -16,7 +16,7 @@
         <p>{{saveData.status}}</p> 
       </div>
     </div>
-    <div ref="contain" class="contain">
+    <div ref="contain"  :class="look==true?'containNobtn':'contain'"> 
       <div class="wrap leave-info">
         <div class="form-itme" @click="showSheet('qjlx')">
           <div class="desc">请假类型</div>
@@ -38,6 +38,7 @@
         </div> -->
         <div class="form-itme">
           <div class="desc">请假天数</div>
+          <!-- 加上了不能输入e -->
           <input @focus="setPos" v-model="saveData.qjts"  type="number" placeholder="请输入天数">
         </div>
         <!-- <div class="form-itme"  @click="choosePicker('jsrq')">
@@ -67,6 +68,11 @@
             <icon  name="Arrow-right" style="width:100%;height:100%"></icon>
           </div>
         </div>
+        <!-- 就诊医院 -->
+        <div class="form-itme" v-if="saveData.sfjz=='是'">
+          <div class="desc">就诊医院</div>
+          <input v-model="saveData.jzyy"  @focus="setPos"  type="text" placeholder="请输入就诊医院">
+        </div>
         <div class="form-itme" v-if="saveData.sfjz=='是'">
           <div class="desc">医生诊断</div>
           <input v-model="saveData.yszd"  @focus="setPos"  type="text" placeholder="请输入医生诊断">
@@ -75,6 +81,14 @@
           <p style="color:#666;text-align:left;padding-left:15px;margin-bottom:10px">主要症状</p>
           <div>
             <span :class="{choose:zzCheckd[index]}" class="box" v-for="item,index in zz" @click="chooseZz(item, index)">{{item}}</span>
+          </div>
+        </div>
+        <!-- 配置体温 -->
+        <div class="form-itme" v-if="zzCheckd[0]">
+          <div class="desc">体温</div>
+          <input v-model="saveData.tw"  @focus="setPos" type="number" placeholder="请输入体温">
+          <div class="icon" style="width:45px;height:25px;line-height:25px;">
+            ℃
           </div>
         </div>
         <div class="form-itme" v-if="zzCheckd[7]">
@@ -93,10 +107,10 @@
       <div style="background:#f8c88c" class="button" @click="temporarySave">暂存</div>
       <div style="background:#5dd3a2" class="button" @click="confirm">提交</div>
     </div>
-    <div v-if="teacherApproval" ref='footer' class="footer">
+    <!-- <div v-if="teacherApproval" ref='footer' class="footer">
       <div style="background:#f8c88c" class="button" @click="rejectLeave">驳回</div>
       <div style="background:#5dd3a2" class="button" @click="permitLeave">准假</div>
-    </div>
+    </div> -->
     <mt-datetime-picker
       ref="picker"
       type="date"
@@ -145,12 +159,16 @@ export default {
         id: "",
         qjyy: "事假",
         qjyynr: "",
-        ksrq: new Date().toLocaleDateString(),
+        //ksrq: new Date().toLocaleDateString(), 
+        ksrq: this.getLocalTime(new Date()),
         jsrq: '',
         qjts: "",
-        fbrq: new Date().toLocaleDateString(),
+        //fbrq: new Date().toLocaleDateString(),
+        fbrq: this.getLocalTime(new Date()),
         sfjz: false,
-        yszd: "",
+        jzyy: "",//就诊医院
+        yszd: "",//医生诊断
+        tw:"", //体温
         zyzz: "",
         qtzz: "",
         status:""
@@ -182,11 +200,18 @@ export default {
     'saveData.sfjz':function(val){
       if(val == '否'){
         this.saveData.yszd=''
+        this.saveData.jzyy="" //把就诊医院清空
+      }
+    },
+    //设置体温 有发热才显示 否则清零
+    'zzCheckd':function(val){
+      if(!val[0]){
+        this.saveData.tw = ''
       }
     },
   },
   created() {
-    this.$store.commit('setPageTitle','请假条')
+    //this.$store.commit('setPageTitle','请假条')
     let query = this.$route.query
     this.zt = JSON.parse(decodeURI(query.curdata)).zt
     this.cklx = query.cklx
@@ -230,6 +255,8 @@ export default {
         this.saveData.zyzz=data.zyzz_text
         this.saveData.qtzz=data.qtzz
         this.saveData.yszd = data.jbzd
+        data.jzyy&&(this.saveData.jzyy = data.jzyy)
+        data.tw&&(this.saveData.tw = data.tw)
         if(data.zt){
           if(data.zt=='0'){
             this.saveData.status ='未审核'
@@ -256,6 +283,8 @@ export default {
         this.saveData.sfjz=data.sfjz
         this.saveData.qtzz=data.qtzz
         this.saveData.yszd = data.yszd
+        data.jzyy&&(this.saveData.jzyy = data.jzyy)
+        data.tw&&(this.saveData.tw = data.tw)
         data.qtzz&&(this.saveData.qtzz= data.qtzz)
         let zyzz=[]; let zyzz_text=[];
         data.zyzz&&(zyzz=data.zyzz.split(","))
@@ -340,7 +369,8 @@ export default {
       }
     },
     handleConfirm(data) {
-      this.saveData[this.current] = data.toLocaleDateString();
+      //this.saveData[this.current] = data.toLocaleDateString();
+      this.saveData[this.current] = this.getLocalTime(data)
       // if (this.current == 'ksrq') {
       //   this.startDate = new Date(this.saveData[this.current]);
       //   this.saveData.jsrq = ''
@@ -400,6 +430,7 @@ export default {
     rejectLeave() {
       alert('驳回')
     },
+    //缓存
     temporarySave() {
       if(this.saveData.qjyy=='病假'){
         this.getZz()
@@ -463,6 +494,17 @@ export default {
       }
       this.zzbh=data.join(",")
     },
+    //检验体温是否在填写的正常范围内
+    checkTwisNormal(tw){
+      tw = parseFloat(tw).toFixed(1)
+      if(tw>42||tw<35){
+        this.$toast('请输入正确的体温范围！')
+        return false 
+      }else{
+        return true 
+      }
+    },
+    //病假
     submitBj(data) {
       this.getZz()
       let param  = {
@@ -473,12 +515,23 @@ export default {
         qqlx:'1',
         tbrq:this.saveData.ksrq,
         //qqksrq:this.saveData.ksrq,
+        //转换为一位小数
         qqts: this.saveData.qjts,
         fbrq:this.saveData.fbrq,
         sfjz:this.saveData.sfjz=='是'?'1':'0',
         zyzz:this.zzbh,
         qtzz:this.saveData.qtzz,
-        jbzd:this.saveData.yszd
+        jbzd:this.saveData.yszd,
+        tw:this.saveData.tw, //体温
+        jzyy:this.saveData.jzyy //就诊医院
+      }
+      if(!param.qqts){
+        this.$toast("请假天数不能为空！")
+        return 
+      }
+      //判断体温
+      if(param.tw&&!this.checkTwisNormal(param.tw)){
+        return 
       }
       param = Object.assign(param, data)
       //console.log(JSON.stringify(param))
@@ -504,6 +557,7 @@ export default {
         console.log(err)
       })
     },
+    //事假
     submitSj(data) {
       let param  = {
         qjlx:'1',
@@ -514,7 +568,12 @@ export default {
         qqyy:this.saveData.qjyynr,
         qqlx:'2',
         qqksrq:this.saveData.ksrq,
+        //转换为一位小数
         qqts: this.saveData.qjts,
+      }
+      if(!param.qqts){
+        this.$toast("请假天数不能为空！")
+        return 
       }
       param = Object.assign(param, data);
       //console.log(JSON.stringify(param))
@@ -576,8 +635,16 @@ export default {
   padding-bottom: 50px;
   -webkit-overflow-scrolling: touch;
 }
+.containNobtn {
+  box-sizing: border-box;
+  height: calc(100vh - 130px);
+  overflow: scroll;
+  width: 100%;
+  /* padding-bottom: 50px; */
+  -webkit-overflow-scrolling: touch;
+}
 .wrap {
-  min-height: 150px;
+  
   margin-top: 7.5px;
   background: #fff;
 }
@@ -585,7 +652,7 @@ export default {
   min-height: 240px;
 }
 .footer {
-  position: absolute;
+  position: fixed;
   width: 100%;
   bottom: 0;
   height: 56px;

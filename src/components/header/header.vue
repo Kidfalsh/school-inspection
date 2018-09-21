@@ -17,7 +17,7 @@ export default {
   props: {
     title: {
       type: String,
-      default: "校园症状监测系统"
+      default: "杭州市学校症状监测系统"
     },
     leftShow: {
       type: Boolean,

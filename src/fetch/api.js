@@ -155,4 +155,16 @@ export default {
   getSymptomsThreeDays(params) {
     return fetch('/rest/queryDataBySql/020301/03', params)
   },
+  //获取在校学生人数或班级人数
+  getNumberStu(params) {
+    return fetch('/rest/queryDataBySql/020301/04', params)
+  },
+  //获取登录机构--学校名称
+  getYljg(params) {
+    return fetch('/rest/queryDataBySql/020303/01', params)
+  },
+  //获取机构下面的用户名
+  getYljgRy(params) {
+    return fetch('/rest/queryDataBySql/020303/02', params)
+  },
 }

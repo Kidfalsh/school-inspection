@@ -7,8 +7,8 @@
     <div v-if="moreShow" class="child-wrap" @click.stop="closeMore">
       <div class="child-list">
         <div  class="child-item">
-          <a @click.stop="Cancellation" >注销</a>
-          <a @click.stop="changePassword"  >修改密码</a>
+          <a @click.stop="Cancellation" >注&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;销</a>
+          <a @click.stop="changePassword">修改密码</a>
         </div>
       </div>
     </div>
@@ -65,7 +65,7 @@ export default {
   },
   computed: {},
   created() {
-    this.$store.commit('setPageTitle','校园症状监测系统');
+    this.$store.commit('setPageTitle','杭州市学校症状监测系统');
   },
   mounted() {
     this.loadChild() 
@@ -266,7 +266,7 @@ export default {
   right: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, .5);
 }
 .child-list {
   position: absolute;
@@ -274,7 +274,7 @@ export default {
   border-radius: 5px;
   top: 40px;
   width: 60px;
-  min-height: 50px;
+  min-height: 60px;
   background: #fff;
 }
 .child-list:after {
@@ -291,7 +291,7 @@ export default {
   position: relative;
   /* display: flex; */
   width: 100%;
-  height: 40px;
+  height: 60px;
   margin: auto;
 }
 .child-item:after {
@@ -307,9 +307,9 @@ export default {
 .child-item a{
   display:block;
   width:100%;
-  height:25px;
+  height:30px;
   font-size: 12px;
-  line-height: 25px;
+  line-height: 30px;
   text-align: center;
 }
 .child-item a:first-child{

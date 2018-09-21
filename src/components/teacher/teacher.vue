@@ -60,8 +60,8 @@ export default {
   computed: {},
   components: {mySwipe,myHeader},
   created() {
-     this.$store.commit('setPageTitle','校园症状监测系统')
-     this.zwlb = this.$store.getters.userInfo.ryxx.zwlb
+    this.$store.commit('setPageTitle','杭州市学校症状监测系统')
+    this.zwlb = this.$store.getters.userInfo.ryxx.zwlb
   },
   mounted() {
     this.loadQjjl()

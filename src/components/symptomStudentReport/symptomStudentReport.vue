@@ -53,7 +53,7 @@ export default {
     }
   },
   created() {
-    this.$store.commit('setPageTitle','症状列表')
+    //this.$store.commit('setPageTitle','症状列表')
     this.query=this.$store.getters.userInfo.ryxx
     this.student = this.$route.query
     this.id = this.student.id //学生id

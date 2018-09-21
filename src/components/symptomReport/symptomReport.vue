@@ -1,19 +1,24 @@
 
 <template>
-  <div>
+  <div class="symptomReport">
     <my-header :title="'症状填报'"></my-header>
     <div class="add" @click.stop="add">
         <icon  name="add" style="width:100%;height:100%"></icon>
     </div>
     <div class="search" @click="showBj">
-      <div style="margin-left:20px;width:80px;font-size:16px;text-align:center">{{selectClass.name?selectClass.name:""}}</div>
+      <div style="margin-left:20px;width:80px;font-size:16px;text-align:center">{{selectClass.name?selectClass.name:"暂无班级"}}</div>
       <div style="flex:1"><icon style="color:#666;height:80%;width:20px" name="down"></icon></div>
       <div style="width:25px;height:20px;margin-right:15px"><icon style="color:#666;height:100%;width:100%" name="search"></icon></div>
-      <div v-if="classShow" style="height:calc(100vh - 90px);position:absolute;top:49px">
+      <div v-if="classShow" class="bjlistshow" >
         <list @selectItem="selectBj" :data="bjList"></list>
       </div>
     </div>
-    <div class="contain">
+    
+    <div class="chooseAll" style="display:flex">
+        <div class="icon-choose" :class="chooseAll&&'selected'"  @click.stop="chooseAllChildren()" ><icon name="choose_nocircle"></icon> </div>
+        <div style="flex:1;line-height:35px;font-size:16px;">全选</div> 
+      </div> 
+    <div class="contain"> 
       <mt-loadmore :autoFill=false :bottom-all-loaded="allLoaded" :bottom-method="loadTottom" ref="loadmore" >
         <div> 
             <div  class="item" v-for="(item,index) in leaveList" :key="index" @click="toDetail(item)">
@@ -61,15 +66,17 @@ export default {
       bjList: [
         
       ],
-      pagesize:7,
+      pagesize:60,
       pageNumber: 1,
       xs_arr:[],
       showTip:false,
       zanwu:false,
+      chooseAll:false,//全选功能
+      chooseallList:[],
     }
   },
   created() {
-    this.$store.commit('setPageTitle','症状填报')
+    //this.$store.commit('setPageTitle','症状填报')
     this.query=this.$store.getters.userInfo.ryxx
     this.loadClass()
   },
@@ -87,9 +94,13 @@ export default {
       if(this.query.zwlb=='004'){
         //this.$toast("这是校医的填报！")
         let param = {
-          xxid:this.query.xxid
+          xxid:this.query.xxid,
+          stat:'1'
         }
         this.api.getClassByjwry(param).then(res=>{
+          if(res.code==1&&res.data.length==0){
+            this.$toast('当前人员没有下属班级！')
+          }
           if(res.code==1&&res.data.length>0){
             this.bjList.push(...res.data)
             this.selectClass = this.bjList[0]
@@ -117,7 +128,8 @@ export default {
           rn_e: this.pagesize * this.pageNumber + "",
           xxid:this.$store.getters.userInfo.ryxx.xxid,
           bjid:jwrybjid,
-          tbrq:(new Date()).toLocaleDateString() //现在暂时不需要传 tbrq 参数查询
+          tbrq:(new Date()).toLocaleDateString(), //现在暂时不需要传 tbrq 参数查询
+          stat:'1' //必须显示为正常的学生
         }
         this.api.getStudentsByClass(param).then(res => {
           if(res.code==1){
@@ -154,9 +166,10 @@ export default {
       } else {
         this.selectClass = data;
         this.classShow = false;
-        this.pageNumber=1
-        this.leaveList=[]
-        this.loadStudents()
+        this.pageNumber=1;
+        this.leaveList=[];
+        this.chooseAll = false;
+        this.loadStudents();
       }
     },
     loadTottom() {
@@ -186,6 +199,32 @@ export default {
       }else{
         this.xs_arr.remove(item.id)
         item.zzzt&&(this.timerList.remove(item.zzzt.substr(5,24)))
+      }
+    },
+    //全选
+    chooseAllChildren(){
+      this.xs_arr=[]
+      this.chooseAll=!this.chooseAll
+      if(this.chooseAll==true){
+        for(let i=0;i<this.leaveList.length;i++){
+          if(this.leaveList[i].zzzt==null){
+            this.leaveList[i].show = true
+            if(this.leaveList[i].show==true){
+              this.xs_arr.push(this.leaveList[i].id)
+              this.leaveList[i].zzzt&&(this.timerList.push(this.leaveList[i].zzzt.substr(5,24)))
+            }else{
+              this.xs_arr.remove(this.leaveList[i].id)
+              this.leaveList[i].zzzt&&(this.timerList.remove(this.leaveList[i].zzzt.substr(5,24)))
+            }
+          }else if(this.leaveList[i].zzzt!=null){
+            this.leaveList[i].show = false
+          }
+        }
+      }else{
+        this.xs_arr=[]
+        for(let i=0;i<this.leaveList.length;i++){
+          this.leaveList[i].show = false
+        }
       }
     },
     //症状填报多选的
@@ -236,6 +275,19 @@ export default {
 </script>
 
 <style  scoped>
+.symptomReport{
+  width:100%;
+  height:100%;
+  position: relative;
+}
+/* bjlistshow */
+.bjlistshow{
+  height:calc(100vh - 90px);
+  height:-webkit-calc(100vh - 90px);
+  position: absolute;
+  top:49px;
+  z-index:3;
+}
 .search{
   height: 50px;
   line-height: 50px;
@@ -244,9 +296,10 @@ export default {
   position: relative;
 }
 .contain {
-  height: calc(100% - 90px);
+  height: calc(100% - 145px);
   background:#f0efed;
   overflow: scroll;
+  -webkit-overflow-scrolling: touch;
 }
 p {
   margin: 0;
@@ -254,6 +307,59 @@ p {
   line-height: 20px;
   color: #666;
   padding-left: 10px;
+}
+.chooseAll{
+  width: 350px;
+  height: 35px;
+  /* background: #fff; */
+  /* border-radius: 5px; */
+  display: flex;
+  margin: 10px auto;
+}
+.chooseAll .icon {
+  width: 50px;
+}
+.chooseAll .icon img {
+  width: 40px;
+  height: 40px;
+  margin: 10px 0 0 10px;
+}
+.chooseAll .content {
+  flex: 1;
+  padding-top: 10px;
+}
+.chooseAll .status {
+  color: red;
+  min-width: 100px;
+  margin-top: 10px;
+  font-size: 16px;
+  text-align: right;
+  padding-right:10px;
+}
+.chooseAll .icon-choose{
+  display: inline-block;
+  width:20px;
+  height:20px;
+  border-radius: 8px;
+  margin-top:7.5px;
+  color: transparent;
+  display: flex;
+  margin-right:10px;
+  margin-left:10px;
+  align-items: center;
+  border:1px solid #ccc;
+  box-sizing: border-box;
+  
+}
+.icon-choose svg{
+    width:100%;
+    height:100%;
+    transform: scale(1.3);
+  }
+.icon-choose.selected{
+  color: #fff;
+  background: #5A8BFF;
+  border: none;
 }
 .item {
   width: 350px;

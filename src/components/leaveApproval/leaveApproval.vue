@@ -62,7 +62,7 @@ export default {
     }
   },
   created() {
-    this.$store.commit('setPageTitle','请假审批')
+    //this.$store.commit('setPageTitle','请假审批')
     this.zwlb = this.$store.getters.userInfo.ryxx.zwlb
   },
   mounted() {

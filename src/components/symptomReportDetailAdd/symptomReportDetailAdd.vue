@@ -67,6 +67,11 @@
             <icon  name="Arrow-right" style="width:100%;height:100%"></icon>
           </div>
         </div>
+        <!-- 就诊医院 -->
+        <div class="form-itme" v-if="saveData.sfjz=='是'">
+          <div class="desc">就诊医院</div>
+          <input v-model="saveData.jzyy"  @focus="setPos"  type="text" placeholder="请输入就诊医院">
+        </div>
         <div class="form-itme" v-if="saveData.sfjz=='是'">
           <div class="desc">医生诊断</div>
           <input v-model="saveData.yszd"  @focus="setPos"  type="text" placeholder="请输入请假事由">
@@ -75,6 +80,14 @@
           <p style="color:#666;text-align:left;padding-left:15px;margin-bottom:10px">主要症状</p>
           <div>
             <span :class="{choose:zzCheckd[index]}" class="box" v-for="item,index in zz" @click="chooseZz(item, index)">{{item}}</span>
+          </div>
+        </div>
+        <!-- 配置体温  解决输入e的问题-->
+        <div class="form-itme" v-if="zzCheckd[0]">
+          <div class="desc">体温</div>
+          <input v-model="saveData.tw"  @focus="setPos"  type="number" placeholder="请输入体温">
+          <div class="icon" style="width:45px;height:25px;line-height:25px;">
+            ℃
           </div>
         </div>
         <!-- <div> -->
@@ -137,21 +150,60 @@ export default {
         bjmc:"",
         xxmc:"",
         sfqq: "否",
-        qqyy: "",
-        qtyy: "",
-        ksrq: new Date().toLocaleDateString(),
+        qqyy: "",//缺勤类型
+        qtyy: "",//缺勤原因其他
+        ksrq: this.getLocalTime(new Date()),
         fbrq: /* new Date().toLocaleDateString() */'',
         sfjz: false,
         yszd: "",
         zyzz: "",
-        qtzz: ""
+        qtzz: "",
+        jzyy:"",//就诊医院
+        tw:"",//体温
       },
       zzCheckd: [],
       query:''
     };
   },
+  watch:{
+    'saveData.sfqq':function(val){
+      if(val =='是'){
+        
+      }else if(val =='否'){
+        this.saveData.qqyy=''
+        this.saveData.qtyy=''
+        this.saveData.fbrq=''
+        this.saveData.yszd=''
+        this.saveData.zyzz=''
+        this.saveData.qtzz=''
+      }
+    },
+    'saveData.qqyy':function(val){
+      if(val == '事假'){
+        this.saveData.fbrq=''
+        this.saveData.sfjz=false
+        this.saveData.yszd=''
+        this.saveData.zyzz=''
+        this.saveData.qtzz=''
+        this.zzCheckd=[]
+      }else if (val=='病假'){
+        this.saveData.fbrq=this.saveData.ksrq
+      }
+    },
+    'saveData.sfjz':function(val){
+      if(val == '否'){
+        this.saveData.yszd=''
+        this.saveData.jzyy = '' //清空就诊医院
+      }
+    },
+    'zzCheckd':function(val){
+      if(!val[0]){
+        this.saveData.tw = ''
+      }
+    }
+  },
   created() {
-    this.$store.commit('setPageTitle','症状填报')
+    //this.$store.commit('setPageTitle','症状填报')
     this.query = this.$route.query
     if(this.query.xs_arr){
       if(this.query.xs_arr.length==1){
@@ -210,14 +262,17 @@ export default {
         this.actions = this.qqyy;
       }
     },
+    //确认时间
     handleConfirm(data) {
-      this.saveData[this.current] = data.toLocaleDateString();
+      //this.saveData[this.current] = data.toLocaleDateString()
+      this.saveData[this.current] = this.getLocalTime(data)
     },
+    //选择时间
     choosePicker(lx) {
       this.current = lx;
       this.pickerValue = new Date(this.saveData[lx])
       if(lx=='fbrq'){
-        this.pickerValue = new Date().toLocaleDateString()
+        this.pickerValue =this.getLocalTime(new Date())
       }
       this.$refs.picker.open();
     },
@@ -295,13 +350,23 @@ export default {
         this.submitTb(param)
       }
     },
+    //检验体温是否在填写的正常范围内
+    checkTwisNormal(tw){
+      tw = parseFloat(tw).toFixed(1)
+      if(tw>42||tw<35){
+        this.$toast('请输入正确的体温范围！')
+        return false 
+      }else{
+        return true 
+      }
+    },
     submitBj(data) {
       this.getZz()
       let param  = {
-        qjlx:'2',
+        //qjlx:'2',
         //qqksrq: this.saveData.ksrq,
         sfjhrsq:'0',
-        qqlx:'1',
+        qqlx:'1',//缺勤原因 1--病假 2--事假
         //qqksrq:this.saveData.ksrq,
         //qqts: this.saveData.qjts||'1',
         qqyy:this.saveData.qtyy,
@@ -310,8 +375,14 @@ export default {
         sfjz:this.saveData.sfjz=='是'?'1':'0',
         zyzz:this.zzbh,
         qtzz:this.saveData.qtzz,
-        tbrq:this.saveData.ksrq||(new Date()).toLocaleDateString(),
+        tbrq:this.saveData.ksrq||this.getLocalTime(new Date()),
+        jbzd:this.saveData.yszd,
+        jzyy:this.saveData.jzyy,
+        tw:this.saveData.tw,
         //shms:'同意'
+      }
+      if(param.tw&&!this.checkTwisNormal(param.tw)){
+        return 
       }
       param = Object.assign(param, data)
       //console.log(JSON.stringify(param))
@@ -329,20 +400,20 @@ export default {
     submitSj(data) {
       this.getZz()
       let param  = {
-        qjlx:'1',
+        //qjlx:'1',
         qjsy: this.saveData.qjyynr,
         sfjhrsq:'0',
         sfqq:this.saveData.sfqq=='是'?"1":"0",
         qqyy:this.saveData.qtyy,
-        qqlx:'2',
+        qqlx:'2',//缺勤原因 1--病假 2--事假
         //qqksrq:this.saveData.ksrq,
         //qqts: this.saveData.qjts||'1',
-        tbrq:this.saveData.ksrq||(new Date()).toLocaleDateString(),
+        tbrq:this.saveData.ksrq||this.getLocalTime(new Date()),
         zyzz:this.zzbh,
         //shms:'同意'
       }
       param = Object.assign(param, data);
-      //console.log(JSON.stringify(param))
+      console.log(JSON.stringify(param))
       this.api.saveZZByTeacher(param).then(res => {
         if(res.code==1){
           this.$toast('保存成功!')
@@ -357,7 +428,7 @@ export default {
     submitTb(data){
       this.getZz()
       let param  = {
-        qjlx:'',
+        //qjlx:'',
         qjsy: this.saveData.qjyynr,
         sfjhrsq:'0',
         sfqq:this.saveData.sfqq=='是'?"1":"0",
@@ -367,12 +438,18 @@ export default {
         sfjz:this.saveData.sfjz=='是'?'1':(this.saveData.sfjz=='否'?'0':''),
         zyzz:this.zzbh,
         qtzz:this.saveData.qtzz,
-        tbrq:this.saveData.ksrq||(new Date()).toLocaleDateString(),
+        tbrq:this.saveData.ksrq||this.getLocalTime(new Date()),
+        jbzd:this.saveData.yszd,
+        jzyy:this.saveData.jzyy,
+        tw:this.saveData.tw,
         //qqts: this.saveData.qjts||'1',
       }
       if(this.saveData.sfqq=='否'){
-        param.qjlx=''
+        //param.qjlx=''
         param.qqlx=''
+      }
+      if(param.tw&&!this.checkTwisNormal(param.tw)){
+        return 
       }
       param = Object.assign(param, data)
       //console.log(JSON.stringify(param))

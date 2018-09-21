@@ -5,10 +5,10 @@
       <img style="width:100%;height:100%" src="../../../static/img/login.png" alt="">
     </div>
     <div class="form">
-      <div class="form-item" style="margin-top:15px">
+      <div class="form-item" style="margin-top:15px"  @click.stop="changeEyes">
         <!-- <icon style="color:#333;height:45px;width:18px;" name="password"></icon> -->
-        <input v-model="userInfo.pastPassword" placeholder="请输入旧密码" type="number">
-        <icon style="color:#333;height:45px;width:18px;" name="openEyes"></icon>
+        <input v-model="userInfo.pastPassword" placeholder="请输入旧密码" type="text">
+        <icon style="color:#333;height:45px;width:25px;" name="eyesclosed"></icon>
       </div>
       <div class="form-item" style="margin-top:15px">
         <input v-model="userInfo.password" placeholder="请输入需要修改的密码" type="password">
@@ -74,6 +74,7 @@ export default {
       }
       this.api.changePassword(param).then(res => {
         if (res.code == '1') {
+          this.$store.commit('set_userName', this.sjhm);
           this.$toast('密码修改成功!');
           this.clearLocal()
           var _this = this //setTimeout 里面的this 为全局
@@ -84,7 +85,7 @@ export default {
                 flag:'parent'
               }
             });
-					},2000);
+					},1000);
         } else {
           this.$toast(res.msg)
         }
@@ -93,9 +94,18 @@ export default {
       })
     },
     submit() {
-        if (!this.checkUserInfo())  return;
-        this.changePassword();
+      if (!this.checkUserInfo())  return;
+      this.changePassword();
+    },
+    changeEyes(e){
+      console.log(e)
+      if (e.target.nodeName.toLowerCase() === 'svg') {
+        console.log(e.target.parent)
+        // 获得引索后，只需要修改data数据就能改变UI了
+        
+      }
     }
+
   },
   components: {}
 };
@@ -158,12 +168,12 @@ input {
 .span_btn {
   display: inline-block;
   width: 90px;
-  height:30px;
-  line-height: 30px;
-  border-radius: 15px;
+  height:28px;
+  line-height: 28px;
+  border-radius: 14px;
   background:#26a2ff;
   color: #fff;
-  font-size: 13px;
+  font-size: 14px;
 }
 .times_btn {
   background:#dcdcdc;

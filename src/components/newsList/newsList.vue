@@ -20,10 +20,10 @@
               </div>
               <div class="Newsdetail">
                   <div class="twoRow">
-                    {{item.wzbt}}
+                      {{item.wzbt}}
                   </div>
                   <div class="newsDate" style="">
-                    {{item.qyrq&&item.qyrq.split(' ')[0]}}
+                      {{item.qyrq&&item.qyrq.split(' ')[0]}}
                   </div>
               </div>
           </div>
@@ -34,8 +34,6 @@
     </div>
 </template>
 <script type="text/javascript">
-// canvas 处理
-
 import myHeader from "@/components/header/header.vue";
 export default {
   data() {
@@ -55,7 +53,7 @@ export default {
     };
   }, 
   created() {
-    this.$store.commit('setPageTitle', '知识馆');
+    //this.$store.commit('setPageTitle', '知识馆');
     let query = this.$route.query;
     this.xxid = query.xxid
     this.query=this.$store.getters.userInfo.ryxx
@@ -162,5 +160,4 @@ export default {
 .Newsdetail>.twoRow{font-size:16px;line-height: 24px;height:48px;color:#333333;}
 /* 字体时间 */
 .Newsdetail>.newsDate{color:#999999;font-size: 12px;margin-top:15px;float:right;}
-.Newsdetail>.hearts{color:#999999;font-size: 12px;margin-top:15px;float:right;}
 </style>

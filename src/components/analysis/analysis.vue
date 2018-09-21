@@ -81,7 +81,9 @@ export default {
       ],
       dateTrend:[],
       userInfo:'',
-      date:['','','','','']
+      date:['','','','',''],
+      xxzrs:'', //学校总人数
+      bjzrs:'', //班级总人数
     }
   },
   computed: {},
@@ -93,12 +95,15 @@ export default {
     this.date[3] = this.getDay(0)
   },
   mounted() {
+    //查询班级人数
+    //this.checkNumberStu()
     //环形图
     this.initRingDiagram()
     // 当日症状分布
     this.initSymptomsToday()
     //症状趋势分布
     this.initSymptomsTrend()
+    
   },
   methods: {
     //渲染环形图
@@ -119,6 +124,11 @@ export default {
           data.sjrs&&(this.RingdiagramData[2].value=data.sjrs||0)
           // 基于准备好的dom，初始化echarts实例 
           var myChart = echarts.init(document.getElementById('echartContainer'))
+          // if(data.zxrs){
+          //   this.RingdiagramData[0].value = this.xxzrs - this.RingdiagramData[0].value
+          // }else{
+          //   this.RingdiagramData[0].value = this.xxzrs
+          // } 
           // 绘制学生状况分布图表 
           myChart.setOption({
             title: {
@@ -528,13 +538,32 @@ export default {
       tDate = this.doHandleMonth(tDate)  
       return tMonth+"月"+tDate+"日"   
     },  
+    //处理月份
     doHandleMonth(month){    
       var m = month    
       if(month.toString().length == 1){    
         m = month    
       }    
       return m    
-    }  
+    },
+    //查询学校人数或班级人数
+    checkNumberStu(){
+      let params={}
+      if(this.userInfo.zwlb=='002'){
+        params.xxid= this.userInfo.xxid
+        params.bjid=this.userInfo.bjid
+      }else{
+        params.xxid= this.userInfo.xxid
+        params.bjid=this.userInfo.bjid
+      }
+      this.api.getNumberStu(params).then(res=>{
+        if(res.code==1&&res.data.length){
+          this.xxzrs = res.data[0].rs
+         
+        }
+      })
+      
+    }
   },
   components: {myHeader}
 }

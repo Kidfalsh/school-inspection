@@ -21,26 +21,28 @@ const store = new Vuex.Store({
       roles:[], // 角色权限
       rybz:'',  // 首次进入选择是家长还是教务人员，然后生成对应的路由表
       addRouters: [],
+      userName:'',//注册成功保存userName 
+      callBack:null,
     },
     mutations: {
         setRoutes: (state, routers) => {
-            state.addRouters = routers;
-            // state.routers = CommonRoutes.concat(routers);
+          state.addRouters = routers;
+          // state.routers = CommonRoutes.concat(routers);
         },
         setLoading(state, value=false) {
-            state.loading = value
+          state.loading = value
         },
-        setPageTitle(state, value='校园症状监测系统') {
-            document.title = value;
-            var i = document.createElement('iframe');
-            i.src = '//m.baidu.com/favicon.ico';
-            i.style.display = 'none';
-            i.onload = function() {
-                setTimeout(function(){
-                i.remove();
-                }, 19)
-            }
-            document.body.appendChild(i);
+        setPageTitle(state, value = '杭州市学校症状监测系统') {
+          document.title = value;
+          var i = document.createElement('iframe');
+          i.src = '//m.baidu.com/favicon.ico';
+          i.style.display = 'none';
+          i.onload = function() {
+            setTimeout(function(){
+            i.remove();
+            }, 19)
+          }
+          document.body.appendChild(i);
         },
         set_userInfo(state, value) {
           state.userInfo = value;
@@ -52,10 +54,17 @@ const store = new Vuex.Store({
           state.rybz = value;
           setLocal('rybz', value)
         },
+        set_userName(state,value){
+          state.userName = value;
+          setLocal('userName', value);
+        },
+        set_callBack(state,value) {
+          state.set_callBack = value;
+        },
     },
     getters: {
         loading(state) {
-            return state.loading;
+          return state.loading;
         },
         roles(state) {
           return state.roles;
@@ -65,20 +74,24 @@ const store = new Vuex.Store({
         },
         userInfo(state) {
           return state.userInfo;
+        },
+        userName(state){
+          return state.userName;
         }
     },
     actions: {
         LoginByUsername({ commit ,state }, userInfo) {
-          console.log(userInfo)
+          //console.log(userInfo)
             let param = {
               yhm:userInfo.username,
-              mm: userInfo.md5Passwrod
+              mm: userInfo.md5Passwrod,
+              xxid:userInfo.xxid
             }
             return new Promise((resolve, reject) => {
               if (state.roles && state.roles[0] == 'teacher') {
                 api.loginByTeacher(param).then(res => {
                   if (res.code == 1) {
-                    console.log(res.data)
+                    //console.log(res.data)
                     commit('set_userInfo', res.data)
                     setLocal('teacher_flag',res.data);
                     resolve();

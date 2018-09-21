@@ -15,18 +15,13 @@ import MintUI from 'mint-ui';
 import 'mint-ui/lib/style.css';
 Vue.use(MintUI);
 
+
 // import FastClick from 'fastclick'
 // FastClick.attach(document.body);
 
 import Icon from 'vue-svg-icon/Icon.vue';
 Vue.component('icon', Icon);
 
-import BaiduMap from 'vue-baidu-map'
-
-Vue.use(BaiduMap, {
-  // ak 是在百度地图开发者平台申请的密钥 详见 http://lbsyun.baidu.com/apiconsole/key */
-  ak: '6mpdyLq1Cnm29cybONgTWIR1VIwkEC1d'
-})
 // import 'babel-polyfill';
 
 axios.get('static/config/config.json?random=' + +new Date(), {}).then(res => {
