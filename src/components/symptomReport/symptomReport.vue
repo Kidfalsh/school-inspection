@@ -416,9 +416,9 @@ p {
 }
 .add{
   position:absolute;
-  top:11px;
-  right:15px;
-  width:18px;
-  height:18px;
+  top:12px;
+  right:16px;
+  width:16px;
+  height:16px;
 }
 </style>

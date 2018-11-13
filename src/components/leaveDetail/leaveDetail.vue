@@ -1,7 +1,7 @@
 
 <template>
   <div style="background:#f0efed">
-    <!-- <div class="look-wrap" v-if="look"></div> -->
+    <div class="look-wrap" v-if="look"></div>
     <my-header :title="title"></my-header>
     <div style="display:flex;width:100%;height:90px;padding-top:10px;background:#fff;box-sizing:border-box;padding-left:25px">
       <div style="width:50px;height:50px">
@@ -39,18 +39,21 @@
         <div class="form-itme">
           <div class="desc">请假天数</div>
           <!-- 加上了不能输入e -->
-          <input @focus="setPos" v-model="saveData.qjts"  type="number" placeholder="请输入天数">
+          <input :readonly="look" @focus="setPos" v-model="saveData.qjts"  type="number" placeholder="请输入天数">
         </div>
-        <!-- <div class="form-itme"  @click="choosePicker('jsrq')">
-          <div class="desc">请假结束日期</div>
-          <div class="content" style="flex:1;text-align:right">{{saveData.jsrq||'请选择'}}</div>
-          <div class="icon" style="width:45px;height:25px">
-            <icon  name="Arrow-right" style="width:100%;height:100%"></icon>
-          </div>
-        </div> -->
-        <div class="form-itme">
+        <!-- <div class="form-itme1">
           <div class="desc">请假事由</div>
           <input v-model="saveData.qjyynr"  @focus="setPos"  type="text" placeholder="请输入请假事由">
+        </div> -->
+        <div>
+          <p style="color:#666;text-align:left;padding-left:15px;margin-bottom:10px">请假事由</p>
+          <div>
+            <span :class="{choose:bjyyChecked[index]}" class="box" v-for="item,index in bjyy" @click="chooseBjyy(item, index)">{{item}}</span>
+          </div>
+        </div> 
+        <div class="form-itme1" v-if="bjyyChecked[14]">
+          <div class="desc">其他原因</div>
+          <input :readonly="look" v-model="saveData.qjyyqt"  @focus="setPos"  type="text" placeholder="请输入其他原因">
         </div>
       </div>
       <div class="wrap symptom" v-if="saveData.qjyy == '病假'">
@@ -71,11 +74,11 @@
         <!-- 就诊医院 -->
         <div class="form-itme" v-if="saveData.sfjz=='是'">
           <div class="desc">就诊医院</div>
-          <input v-model="saveData.jzyy"  @focus="setPos"  type="text" placeholder="请输入就诊医院">
+          <input :readonly="look" v-model="saveData.jzyy"  @focus="setPos"  type="text" placeholder="请输入就诊医院">
         </div>
         <div class="form-itme" v-if="saveData.sfjz=='是'">
           <div class="desc">医生诊断</div>
-          <input v-model="saveData.yszd"  @focus="setPos"  type="text" placeholder="请输入医生诊断">
+          <input :readonly="look" v-model="saveData.yszd"  @focus="setPos"  type="text" placeholder="请输入医生诊断">
         </div>
         <div>
           <p style="color:#666;text-align:left;padding-left:15px;margin-bottom:10px">主要症状</p>
@@ -86,26 +89,26 @@
         <!-- 配置体温 -->
         <div class="form-itme" v-if="zzCheckd[0]">
           <div class="desc">体温</div>
-          <input v-model="saveData.tw"  @focus="setPos" type="number" placeholder="请输入体温">
+          <input :readonly="look" v-model="saveData.tw" style="padding-right:5px;" @focus="setPos" type="number" placeholder="请输入体温">
           <div class="icon" style="width:45px;height:25px;line-height:25px;">
             ℃
           </div>
         </div>
-        <div class="form-itme" v-if="zzCheckd[7]">
+        <div class="form-itme1" v-if="zzCheckd[7]">
           <div class="desc">其他症状</div>
-          <input v-model="saveData.qtzz"  @focus="setPos"  type="text" placeholder="请输入其他症状">
+          <input :readonly="look" v-model="saveData.qtzz"  @focus="setPos"  type="text" placeholder="请输入其他症状">
         </div>
       </div>
       <div v-if="teacherApproval || look || jzEdit" style="margin:10px 0;height:40px;background:#fff">
-        <div class="form-itme">
+        <div class="form-itme1">
           <div class="desc">老师反馈</div>
           <input v-model="bz"  @focus="setPos"  type="text" placeholder="" readOnly="true" >
         </div>
       </div>
     </div>
     <div v-if="!look && !teacherApproval" ref='footer' class="footer">
-      <div style="background:#f8c88c" class="button" @click="temporarySave">暂存</div>
-      <div style="background:#5dd3a2" class="button" @click="confirm">提交</div>
+      <div style="background:#f8c88c" class="button" @click="temporarySave">暂 存</div>
+      <div style="background:#5dd3a2" class="button" @click="confirm">提 交</div>
     </div>
     <!-- <div v-if="teacherApproval" ref='footer' class="footer">
       <div style="background:#f8c88c" class="button" @click="rejectLeave">驳回</div>
@@ -152,29 +155,35 @@ export default {
         { name: "是", method: this.chooseSfjz },
         { name: "否", method: this.chooseSfjz }
       ],
+      //缺勤原因 --病假
+      bjyy:[
+        "感冒","气管炎/肺炎","胃肠道疾病","心脏病","眼病",
+        "牙病","耳鼻喉疾病","泌尿系疾病","神经衰弱","意外伤害",
+        "结核","肝炎","其他传染病","病因不明","其他"
+      ],
+      bjyyChecked:[],
       zz: ["发热", "呕吐", "咳嗽", "红眼", "腹泻", "皮疹", "腮腺肿大", "其他"],
-      zzbh:'',
+      zzCheckd: [],
+      zzbh:'', //症状编号
       pickerValue: "",
       saveData: {
         id: "",
         qjyy: "事假",
-        qjyynr: "",
-        //ksrq: new Date().toLocaleDateString(), 
+        qjyynr: "", //请假原因内容
+        qjyyqt:"",//其他请假原因
         ksrq: this.getLocalTime(new Date()),
         jsrq: '',
         qjts: "",
-        //fbrq: new Date().toLocaleDateString(),
         fbrq: this.getLocalTime(new Date()),
         sfjz: false,
         jzyy: "",//就诊医院
         yszd: "",//医生诊断
         tw:"", //体温
-        zyzz: "",
-        qtzz: "",
+        zyzz: "", //主要症状
+        qtzz: "", //其他症状
         status:""
       },
-      bz:'',
-      zzCheckd: [],
+      bz:'', //备注
       cklx:'',
       zt:''
     };
@@ -193,22 +202,36 @@ export default {
         this.saveData.zyzz=''
         this.saveData.qtzz=''
         this.zzCheckd=[]
+        this.bjyyChecked = []
+        this.bjyyChecked[14]=true 
       }else if (val=='病假'){
         this.saveData.fbrq=this.saveData.ksrq
+        //this.bjyyChecked = []
+        //this.bjyyChecked[14]=''  //病假其他原因置为空
       }
     },
+    //判断是否就诊
     'saveData.sfjz':function(val){
       if(val == '否'){
         this.saveData.yszd=''
         this.saveData.jzyy="" //把就诊医院清空
       }
     },
-    //设置体温 有发热才显示 否则清零
+    //设置体温 有发热才显示 否则清零   其他症状
     'zzCheckd':function(val){
       if(!val[0]){
         this.saveData.tw = ''
       }
+      if(!val[7]){
+        this.saveData.qtzz = ""
+      }
     },
+    //设置其他请假原因 --操作其他选项
+    'bjyyChecked':function(val){
+      if(!val[14]){
+        this.saveData.qjyyqt = ""
+      }
+    }
   },
   created() {
     //this.$store.commit('setPageTitle','请假条')
@@ -221,18 +244,19 @@ export default {
     if (query.cklx == 1) { // 查看
       this.look = true;
       this.curChild = JSON.parse(decodeURI(query.curdata))
-      //this.saveData = this.curChild;
       this.init(this.curChild)
     } else if (query.cklx == 2) { // 教务人员编辑 
       this.teacherApproval = true
     } else if (query.cklx == 3) { // 家长编辑
       this.curChild=JSON.parse(decodeURI(query.curdata))
       this.init(this.curChild)
-      this.getLocalTemporary(); 
-      //this.init(this.curChild)
-      //this.jzEdit = true
+      this.getLocalTemporary();
     } else {
       this.curChild=JSON.parse(decodeURI(query.curdata))
+    }
+    //如果是事假  默认选中请假原因的其他 可不写内容
+    if(this.saveData.qjyy=='事假'){
+      this.bjyyChecked[14]=true 
     }
   },
   mounted() {
@@ -244,6 +268,7 @@ export default {
     };
   },
   methods: {
+    //初始化 信息
     init(data){
       if(data){
         this.saveData.qjyy=data.qqlx_text
@@ -269,9 +294,15 @@ export default {
         //data.zyzz_text&&(this.zzCheckd=data.zyzz_text.split(","))
         data.zyzz_text&&(this.setZz(data.zyzz_text.split(",")))
         data.shms&&(this.bz = data.shms)
+        //请假原因
+        data.qqyy&&(this.saveData.qjyynr=data.qqyy.split(","))
+        data.qqyy&&(this.setBjyy(this.saveData.qjyynr))
+        
       }
     },
+    //获取 本地存储 --未提交的
     getLocalTemporary() {
+      //取出对应的本地缓存
       let data = getLocal(`temporary_${this.curChild.xsid}`);
       if(data){
         this.saveData.status=data.qjyy+'未提交'
@@ -315,6 +346,9 @@ export default {
           }
         } 
         this.setZz(zyzz)
+        data.qjyynr&&(this.saveData.qjyynr=data.qjyynr.split(","))
+        data.qjyynr&&(this.setBjyy(this.saveData.qjyynr))
+        this.setBjyy(this.saveData.qjyynr)
       } 
     },
     //从缓存或者数据中拿到症状 赋值上去
@@ -346,13 +380,44 @@ export default {
         }
       }
     },
-    loadQljlMx() {
-      let param = {
-
+    //从数据中拿到症状 赋值到请假原因上
+    setBjyy(data){
+      for(let i=0;i<data.length;i++){
+        this.bjyyChecked[14] = true 
+        this.saveData.qjyyqt = data[i]
+        if(data[i]=="感冒"){
+          this.bjyyChecked[0]=true
+        }if(data[i]=="气管炎/肺炎"){
+          this.bjyyChecked[1]=true
+        }if(data[i]=="胃肠道疾病"){
+          this.bjyyChecked[2]=true
+        }if(data[i]=="心脏病"){
+          this.bjyyChecked[3]=true
+        }if(data[i]=="眼病"){
+          this.bjyyChecked[4]=true
+        }if(data[i]=="牙病"){
+          this.bjyyChecked[5]=true
+        }if(data[i]=="耳鼻喉疾病"){
+          this.bjyyChecked[6]=true
+        }if(data[i]=="泌尿系疾病"){
+          this.bjyyChecked[7]=true
+        }if(data[i]=="神经衰弱"){
+          this.bjyyChecked[8]=true
+        }if(data[i]=="意外伤害"){
+          this.bjyyChecked[9]=true
+        }if(data[i]=="结核"){
+          this.bjyyChecked[10]=true
+        }if(data[i]=="肝炎"){
+          this.bjyyChecked[11]=true
+        }if(data[i]=="其他传染病"){
+          this.bjyyChecked[12]=true
+        }if(data[i]=="病因不明"){
+          this.bjyyChecked[13]=true
+        }if(data[i].indexOf("其他")!='-1'){
+          this.bjyyChecked[14]=true
+          this.saveData.qjyyqt = data[i].split("其他-")[1]
+        }
       }
-      this.api.getQjjlmxByParent(param).then(res => {
-        //console.log(res)
-      })
     },
     chooseQjlx(data) {
       this.saveData.qjyy = data.name;
@@ -360,7 +425,11 @@ export default {
     chooseSfjz(data) {
       this.saveData.sfjz = data.name;
     },
+    //显示下拉选择
     showSheet(lx) {
+      if(this.look){
+        return 
+      }
       this.sheetVisible = true;
       if (lx === "qjlx") {
         this.actions = this.qjlx;
@@ -368,6 +437,7 @@ export default {
         this.actions = this.sfjz;
       }
     },
+    //确认日期
     handleConfirm(data) {
       //this.saveData[this.current] = data.toLocaleDateString();
       this.saveData[this.current] = this.getLocalTime(data)
@@ -376,7 +446,11 @@ export default {
       //   this.saveData.jsrq = ''
       // }
     },
+    //选择开始日期 --初始化日期
     choosePicker(lx) {
+      if(this.look){
+        return 
+      }
       this.current = lx;
       this.pickerValue = new Date(this.saveData[lx]);
 
@@ -387,27 +461,21 @@ export default {
       // }
       this.$refs.picker.open();
     },
-    chooseQjyy(data) {
-      this.saveData.qjyy = data;
-    },
+    //选择症状
     chooseZz(data, index) {
+      //look is true,can't choose
+      if(this.look){
+        return 
+      }
       this.$set(this.zzCheckd, index, !this.zzCheckd[index]);
     },
-    showQttzz(bz) {
-      if(bz) {
-
-      } else {
-
+    //选择请假原因
+    chooseBjyy(data,index) {
+      //look is true,can't choose
+      if(this.look){
+        return 
       }
-    },
-    getZz() {
-      let arr = [];
-      for (let [i, v] of this.zz.entries()) {
-        if (this.zzCheckd[i]) {
-          arr.push(v);
-        }
-      }
-      this.checkZZ(arr)
+      this.$set(this.bjyyChecked, index, !this.bjyyChecked[index]);
     },
     setPos(e) {
       let pos = e.target.getBoundingClientRect();
@@ -430,19 +498,22 @@ export default {
     rejectLeave() {
       alert('驳回')
     },
-    //缓存
+    //缓存  --暂存
     temporarySave() {
       if(this.saveData.qjyy=='病假'){
         this.getZz()
         this.saveData.zyzz=this.zzbh
       }
-      let data = this.saveData;
+      //病假事假 都会处理请假原因
+      this.getQjyybh()
+      let data = this.saveData
       let temp = getLocal('temporary_'+this.curChild.xsid);
       let obj = temp ? temp : '';
       setLocal(`temporary_${this.curChild.xsid}`, data);
       this.$toast('暂存成功!');
       this.$router.back();
     },
+    //提交
     confirm() {
       if (!this.checkSaveData()) return;
       let ryxx = this.$store.getters.userInfo.ryxx;
@@ -463,6 +534,16 @@ export default {
       } else {
         this.submitSj(param);
       }
+    },
+    //得到症状标号
+    getZz() {
+      let arr = [];
+      for (let [i, v] of this.zz.entries()) {
+        if (this.zzCheckd[i]) {
+          arr.push(v);
+        }
+      }
+      this.checkZZ(arr)
     },
     //症状初始化
     checkZZ(data){
@@ -494,6 +575,24 @@ export default {
       }
       this.zzbh=data.join(",")
     },
+    //得到请假原因
+    getQjyybh(){
+      let arr = [];
+      for (let [i, v] of this.bjyy.entries()) {
+        if (this.bjyyChecked[i]) {
+          arr.push(v);
+        }
+      }
+      this.checkBjyy(arr)
+    },
+    checkBjyy(data){
+      for(let i=0;i<data.length;i++){
+        if(data[i]=='其他'){
+          data[i]='其他-'+this.saveData.qjyyqt
+        }
+      }
+     this.saveData.qjyynr=data.join(",")
+    },
     //检验体温是否在填写的正常范围内
     checkTwisNormal(tw){
       tw = parseFloat(tw).toFixed(1)
@@ -507,11 +606,12 @@ export default {
     //病假
     submitBj(data) {
       this.getZz()
+      this.getQjyybh()
       let param  = {
         qjlx:'2',
         sfjhrsq:'1',
         sfqq:'1',
-        qqyy:this.saveData.qjyynr,
+        qqyy:this.saveData.qjyynr, //病假原因
         qqlx:'1',
         tbrq:this.saveData.ksrq,
         //qqksrq:this.saveData.ksrq,
@@ -531,6 +631,11 @@ export default {
       }
       //判断体温
       if(param.tw&&!this.checkTwisNormal(param.tw)){
+        return 
+      }
+      //判断是否有请假原因
+      if(!param.qqyy){
+        this.$toast("请假原因至少选一项！")
         return 
       }
       param = Object.assign(param, data)
@@ -559,6 +664,8 @@ export default {
     },
     //事假
     submitSj(data) {
+      //请假原因 多选
+      this.getQjyybh()
       let param  = {
         qjlx:'1',
         qjsy: this.saveData.qjyynr,
@@ -607,13 +714,14 @@ export default {
 </script>
 
 <style  scoped>
+/* 家长查看 不能进行修改 */
 .look-wrap {
   width: 100%;
-  height: 100%;
-  position: fixed;
+  min-height: calc(100% - 40px);
+  position: absolute;
   top: 40px;
   left: 0;
-  z-index: 2;
+  z-index: 0;
 }
 .mes p {
   text-align: left;
@@ -649,7 +757,7 @@ export default {
   background: #fff;
 }
 .symptom {
-  min-height: 240px;
+  min-height: 200px;
 }
 .footer {
   position: fixed;
@@ -669,6 +777,9 @@ export default {
   color: #fff;
   text-align: center;
   border-radius: 8px;
+  font-size:14px;
+  /* letter-spacing: 20px; */
+  word-spacing: 20px;
 }
 p {
   padding: 0;
@@ -698,10 +809,10 @@ input:focus {
   min-width: 35px;
   margin: 0 0 10px 10px;
   text-align: center;
-  padding: 0 10px;
+  padding: 0 5px;
   color: #666;
   /* border: 1px solid #dcdcdc; */
-  /* border: 1px solid #dcdcdc; */
+  /* border: 0.5px solid #dcdcdc; */
   box-shadow: 0 0 0 0.5px #dcdcdc;
   border-radius: 10px;
   height: 20px;
@@ -729,5 +840,14 @@ input:focus {
   border-bottom: 1px solid #dcdcdc;
   height: 0;
   transform: scaleY(0.5);
+}
+.form-itme1 {
+  position: relative;
+  height: 45px;
+  display: flex;
+  color: #666;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-left: 15px;
 }
 </style>

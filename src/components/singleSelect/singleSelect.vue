@@ -49,14 +49,22 @@ export default {
       default: false
     }
   },
+  data: function () {
+    return {
+      valueItem: this.values
+    }
+  },
   created(){
   },
   methods: {
     clickRow(item) {
       if (Object.keys(this.values).length && this.values[this.custom] == item[this.custom]) {
-        this.values = {};
+        //this.values = {};
+        this.valueItem = {} //把values 的值换到新变量里面  避免警告
       } else {
-        this.values = item;
+        //修改values值
+        //this.values = item;
+        this.valueItem = item 
       }
       if (this.quick) {
         this.confirm();
@@ -67,7 +75,8 @@ export default {
       this.$emit("cancle", "cancle");
     },
     confirm() {
-      let result = this.values;
+      let result = this.valueItem;
+      //let result = Object.assign({},this.values)
       this.$emit('confirm', result);
     },
   },

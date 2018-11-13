@@ -76,6 +76,7 @@ export default {
     width: 100%;
     max-height:calc(100% - 40px);
     overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
 }
 /*!
  * Quill Editor v1.2.6

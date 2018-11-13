@@ -47,9 +47,19 @@
             <icon  name="Arrow-right" style="width:100%;height:100%"></icon>
           </div>
         </div>
-        <div class="form-itme" v-if="saveData.sfqq=='是'">
+        <!-- <div class="form-itme" v-if="saveData.sfqq=='是'">
           <div class="desc">缺勤原因</div>
           <input v-model="saveData.qtyy"  @focus="setPos"  type="text" placeholder="请输入其他缺勤原因">
+        </div> -->
+        <div v-if="saveData.sfqq=='是'" >
+          <p style="color:#666;text-align:left;padding-left:15px;margin-bottom:10px">缺勤原因</p>
+          <div>
+            <span :class="{choose:bjyyChecked[index]}" class="box" v-for="item,index in bjyy" @click="chooseBjyy(item, index)">{{item}}</span>
+          </div>
+        </div> 
+        <div class="form-itme" v-if="bjyyChecked[14]">
+          <div class="desc">其他原因</div>
+          <input v-model="saveData.qqyyqt"  @focus="setPos"  type="text" placeholder="请输入其他原因">
         </div>
       </div>
       <div class="wrap symptom" v-if="(saveData.sfqq=='是'&&saveData.qqyy!='事假')||saveData.sfqq=='否'">
@@ -85,7 +95,7 @@
         <!-- 配置体温 -->
         <div class="form-itme" v-if="zzCheckd[0]">
           <div class="desc">体温</div>
-          <input v-model="saveData.tw" @focus="setPos"  type="number" placeholder="请输入体温">
+          <input v-model="saveData.tw" @focus="setPos" style="padding-right:5px;" type="number" placeholder="请输入体温">
           <div class="icon" style="width:45px;height:25px;line-height:25px;">
             ℃
           </div>
@@ -141,6 +151,13 @@ export default {
         { name: "是", method: this.chooseSfjz },
         { name: "否", method: this.chooseSfjz }
       ],
+      //缺勤原因 --病假
+      bjyy:[
+        "感冒","气管炎/肺炎","胃肠道疾病","心脏病","眼病",
+        "牙病","耳鼻喉疾病","泌尿系疾病","神经衰弱","意外伤害",
+        "结核","肝炎","其他传染病","病因不明","其他"
+      ],
+      bjyyChecked:[],
       zz: ["发热", "呕吐", "咳嗽", "红眼", "腹泻", "皮疹", "腮腺肿大", "其他"],
       zzbh:'',
       pickerValue: "",
@@ -214,6 +231,15 @@ export default {
       if(!val[0]){
         this.saveData.tw = ''
       }
+      if(!val[7]){
+        this.saveData.qtzz = ""
+      }
+    },
+    //设置其他请假原因 --操作其他选项
+    'bjyyChecked':function(val){
+      if(!val[14]){
+        this.saveData.qqyyqt = ""
+      }
     }
   },
   methods: {
@@ -236,6 +262,7 @@ export default {
           data.jbzd&&(this.saveData.yszd = data.jbzd)
           data.tw&&(this.saveData.tw = parseFloat(data.tw).toFixed(1))
           data.jzyy&&(this.saveData.jzyy = data.jzyy)
+          data.qqyy&&(this.setBjyy(data.qqyy.split(",")))
         }
       })
     },
@@ -265,6 +292,43 @@ export default {
         }
         if(data[i]=='99'){
           this.zzCheckd[7]=true
+        }
+      }
+    },
+    //从数据中拿到症状 赋值到请假原因上
+    setBjyy(data){
+      for(let i=0;i<data.length;i++){
+        if(data[i]=="感冒"){
+          this.bjyyChecked[0]=true
+        }if(data[i]=="气管炎/肺炎"){
+          this.bjyyChecked[1]=true
+        }if(data[i]=="胃肠道疾病"){
+          this.bjyyChecked[2]=true
+        }if(data[i]=="心脏病"){
+          this.bjyyChecked[3]=true
+        }if(data[i]=="眼病"){
+          this.bjyyChecked[4]=true
+        }if(data[i]=="牙病"){
+          this.bjyyChecked[5]=true
+        }if(data[i]=="耳鼻喉疾病"){
+          this.bjyyChecked[6]=true
+        }if(data[i]=="泌尿系疾病"){
+          this.bjyyChecked[7]=true
+        }if(data[i]=="神经衰弱"){
+          this.bjyyChecked[8]=true
+        }if(data[i]=="意外伤害"){
+          this.bjyyChecked[9]=true
+        }if(data[i]=="结核"){
+          this.bjyyChecked[10]=true
+        }if(data[i]=="肝炎"){
+          this.bjyyChecked[11]=true
+        }if(data[i]=="其他传染病"){
+          this.bjyyChecked[12]=true
+        }if(data[i]=="病因不明"){
+          this.bjyyChecked[13]=true
+        }if(data[i].indexOf("其他")!='-1'){
+          this.bjyyChecked[14]=true
+          this.saveData.qqyyqt = data[i].split("其他-")[1]
         }
       }
     },
@@ -324,12 +388,9 @@ export default {
     chooseZz(data, index) {
       this.$set(this.zzCheckd, index, !this.zzCheckd[index]);
     },
-    showQtzz(bz) {
-      if(bz) {
-
-      } else {
-
-      }
+    //选择请假原因
+    chooseBjyy(data,index) {
+      this.$set(this.bjyyChecked, index, !this.bjyyChecked[index]);
     },
     //症状初始化
     checkZZ(data){
@@ -360,6 +421,24 @@ export default {
         }
       }
       this.zzbh=data.join(",")
+    },
+    //得到请假原因
+    getQjyybh(){
+      let arr = [];
+      for (let [i, v] of this.bjyy.entries()) {
+        if (this.bjyyChecked[i]) {
+          arr.push(v);
+        }
+      }
+      this.checkBjyy(arr)
+    },
+    checkBjyy(data){
+      for(let i=0;i<data.length;i++){
+        if(data[i]=='其他'){
+          data[i]='其他-'+this.saveData.qqyyqt
+        }
+      }
+     this.saveData.qtyy=data.join(",")
     },
     getZz() {
       let arr = [];
@@ -414,6 +493,7 @@ export default {
     },
     submitBj(data) {
       this.getZz()
+      this.getQjyybh()
       let param  = {
         qjlx:'2',
         //qqksrq: this.saveData.ksrq,
@@ -450,6 +530,7 @@ export default {
     },
     submitSj(data) {
       this.getZz()
+      this.getQjyybh()
       let param  = {
         qjlx:'1',
         qjsy: this.saveData.qjyynr,
@@ -539,17 +620,17 @@ export default {
   overflow: scroll;
   width: 100%;
   padding-bottom: 50px;
+  -webkit-overflow-scrolling: touch;
 }
 .wrap {
-  min-height: 45px;
   margin-top: 7.5px;
   background: #fff;
 }
 .symptom {
-  min-height: 140px;
+  min-height: 200px;
 }
 .footer {
-  position: absolute;
+  position: fixed;
   width: 100%;
   bottom: 0;
   height: 56px;
@@ -595,10 +676,11 @@ input:focus {
   min-width: 35px;
   margin: 0 0 10px 10px;
   text-align: center;
-  padding: 0 10px;
+  padding: 0 5px;
   color: #666;
   /* border: 1px solid #dcdcdc; */
-  /* border: 1px solid #dcdcdc; */
+  /* border:1px solid #dcdcdc; */
+  /* border: 0.5px solid #dcdcdc; */
   box-shadow: 0 0 0 0.5px #dcdcdc;
   border-radius: 10px;
   height: 20px;

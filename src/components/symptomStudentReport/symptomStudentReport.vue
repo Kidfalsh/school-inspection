@@ -141,10 +141,10 @@ export default {
 }
 .add{
     position:absolute;
-    top:11px;
+    top:12px;
     right:15px;
-    width:18px;
-    height:18px;
+    width:16px;
+    height:16px;
 }
 .contain {
   height: calc(100% - 40px);

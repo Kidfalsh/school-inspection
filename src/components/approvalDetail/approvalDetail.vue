@@ -28,9 +28,19 @@
           <div class="content" style="flex:1;text-align:right">{{qjdata.qjts?qjdata.qjts:''}}</div>
           <!-- <input @focus="setPos" v-model="qjdata.qjts"  type="number" placeholder="请输入天数"> -->
         </div>
-        <div class="form-itme">
+        <!-- <div class="form-itme">
           <div class="desc">请假事由</div>
           <div class="content" style="flex:1;text-align:right">{{qjdata.qjyy}}</div>
+        </div> -->
+        <div style="display:flex;align-items:center;padding:10px 0">
+          <p style="color:#666;text-align:left;padding-left:15px;margin-bottom:10px">请假事由</p>
+          <div style="flex:1">
+            <span  class="box choose" v-for="item,index in qjdata.qjyy">{{item}}</span>
+          </div>
+        </div> 
+        <div class="form-itme" v-if="qjdata.bjyyqt">
+          <div class="desc">其他原因</div>
+          <div class="content" style="flex:1;text-align:right">{{qjdata.bjyyqt}}</div>
         </div>
       </div>
       <div class="wrap symptom" v-if="qjdata.qjlx == '病假'">
@@ -61,7 +71,7 @@
         <!-- 配置体温 -->
         <div class="form-itme" v-if="twShow">
           <div class="desc">体温</div>
-          <input v-model="qjdata.tw"  @focus="setPos" style="text-align:right;margin-right:-25px;" type="number" placeholder="请输入体温">
+          <input readonly v-model="qjdata.tw"  @focus="setPos" style="text-align:right;margin-right:-25px;" type="number" placeholder="请输入体温">
           <div class="icon" style="width:45px;height:25px;line-height:25px;text-align:center;">
             ℃
           </div>
@@ -103,17 +113,25 @@ export default {
     return {
       title: "请假条",
       look: false,
+      //缺勤原因 --病假
+      bjyy:[
+        "感冒","气管炎/肺炎","胃肠道疾病","心脏病","眼病",
+        "牙病","耳鼻喉疾病","泌尿系疾病","神经衰弱","意外伤害",
+        "结核","肝炎","其他传染病","病因不明","其他"
+      ],
+      bjyyChecked:[],
       zz: ["发热", "呕吐", "咳嗽", "红眼", "腹泻", "皮疹", "腮腺肿大", "其他"],
       qjdata: {
         qjlx:'',
         qjrq:'',
         qjts:'',
         qjyy: '',
+        bjyyqt:'',
         fbrq: '',
         sfjz: '',
         jzyy:'',//就诊医院
         yszd: '',
-        zz:["发热", "呕吐", "咳嗽"],
+        zz:[],
         qtzz: '',
         tw:''//体温
       },
@@ -155,9 +173,9 @@ export default {
         this.$refs.contain.scrollTop += this.focus_top - pos_f.top + 45;
       }
     };
-    setTimeout(() => {
-      this.$refs.contain.scrollTop = this.$refs.contain.scrollHeight
-    },100)
+    // setTimeout(() => {
+    //   this.$refs.contain.scrollTop = this.$refs.contain.scrollHeight
+    // },100)
   },
   methods: {
     init(data){
@@ -185,6 +203,14 @@ export default {
           this.twShow = false 
         }
         data.zyzz_text&&(this.qjdata.zz=data.zyzz_text.split(","))
+        //初始化-请假原因
+        data.qqyy&&(this.qjdata.qjyy=data.qqyy.split(","))
+        for(let i =0;i<this.qjdata.qjyy.length;i++){
+          if(this.qjdata.qjyy[i].indexOf("其他-")!='-1'){
+            this.qjdata.bjyyqt = this.qjdata.qjyy[i].split("其他-")[1]
+            this.qjdata.qjyy[i] = this.qjdata.qjyy[i].split("-")[0]
+          }
+        }
       }
       //data.zyzz_text&&(this.setZz(data.zyzz_text.split(",")))
     },

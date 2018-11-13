@@ -29,17 +29,6 @@
             <icon  name="Arrow-right" style="width:100%;height:100%"></icon>
           </div>
         </div>
-       <!--  <div class="form-itme"  @click="choosePicker('ksrq')">
-          <div class="desc">请假日期</div>
-          <div class="content" style="flex:1;text-align:right">{{saveData.ksrq||'请选择'}}</div>
-          <div class="icon" style="width:45px;height:25px">
-            <icon  name="Arrow-right" style="width:100%;height:100%"></icon>
-          </div>
-        </div> -->
-        <!-- <div class="form-itme">
-          <div class="desc">请假天数</div>
-          <input @focus="setPos" v-model="saveData.qjts"  type="number" placeholder="请输入天数">
-        </div> -->
         <div class="form-itme"  @click="choosePicker('ksrq')">
           <div class="desc">填报日期</div>
           <div class="content" style="flex:1;text-align:right">{{saveData.ksrq||'请选择'}}</div>
@@ -47,9 +36,19 @@
             <icon  name="Arrow-right" style="width:100%;height:100%"></icon>
           </div>
         </div>
-        <div class="form-itme" v-if="saveData.sfqq=='是'">
+        <!-- <div class="form-itme" v-if="saveData.sfqq=='是'">
           <div class="desc">缺勤原因</div>
           <input v-model="saveData.qtyy"  @focus="setPos"  type="text" placeholder="请输入其他缺勤原因">
+        </div> -->
+        <div v-if="saveData.sfqq=='是'" >
+          <p style="color:#666;text-align:left;padding-left:15px;margin-bottom:10px">缺勤原因</p>
+          <div>
+            <span :class="{choose:bjyyChecked[index]}" class="box" v-for="item,index in bjyy" @click="chooseBjyy(item, index)">{{item}}</span>
+          </div>
+        </div> 
+        <div class="form-itme" v-if="bjyyChecked[14]">
+          <div class="desc">其他原因</div>
+          <input v-model="saveData.qqyyqt"  @focus="setPos"  type="text" placeholder="请输入其他原因">
         </div>
       </div>
       <div class="wrap symptom" v-if="(saveData.sfqq=='是'&&saveData.qqyy!='事假')||saveData.sfqq=='否'">
@@ -85,7 +84,7 @@
         <!-- 配置体温  解决输入e的问题-->
         <div class="form-itme" v-if="zzCheckd[0]">
           <div class="desc">体温</div>
-          <input v-model="saveData.tw"  @focus="setPos"  type="number" placeholder="请输入体温">
+          <input v-model="saveData.tw"  @focus="setPos" style="padding-right:5px;" type="number" placeholder="请输入体温">
           <div class="icon" style="width:45px;height:25px;line-height:25px;">
             ℃
           </div>
@@ -141,6 +140,13 @@ export default {
         { name: "是", method: this.chooseSfjz },
         { name: "否", method: this.chooseSfjz }
       ],
+      //缺勤原因 --病假
+      bjyy:[
+        "感冒","气管炎/肺炎","胃肠道疾病","心脏病","眼病",
+        "牙病","耳鼻喉疾病","泌尿系疾病","神经衰弱","意外伤害",
+        "结核","肝炎","其他传染病","病因不明","其他"
+      ],
+      bjyyChecked:[],
       zz: ["发热", "呕吐", "咳嗽", "红眼", "腹泻", "皮疹", "腮腺肿大", "其他"],
       zzbh:'',
       pickerValue: "",
@@ -151,7 +157,8 @@ export default {
         xxmc:"",
         sfqq: "否",
         qqyy: "",//缺勤类型
-        qtyy: "",//缺勤原因其他
+        qtyy: "",//缺勤原因
+        qqyyqt:"",//缺勤原因其他
         ksrq: this.getLocalTime(new Date()),
         fbrq: /* new Date().toLocaleDateString() */'',
         sfjz: false,
@@ -186,6 +193,8 @@ export default {
         this.saveData.zyzz=''
         this.saveData.qtzz=''
         this.zzCheckd=[]
+        this.bjyyChecked = []
+        this.bjyyChecked[14]=true 
       }else if (val=='病假'){
         this.saveData.fbrq=this.saveData.ksrq
       }
@@ -199,6 +208,12 @@ export default {
     'zzCheckd':function(val){
       if(!val[0]){
         this.saveData.tw = ''
+      }
+    },
+    //设置其他请假原因 --操作其他选项
+    'bjyyChecked':function(val){
+      if(!val[14]){
+        this.saveData.qqyyqt = ""
       }
     }
   },
@@ -279,12 +294,9 @@ export default {
     chooseZz(data, index) {
       this.$set(this.zzCheckd, index, !this.zzCheckd[index]);
     },
-    showQtzz(bz) {
-      if(bz) {
-
-      } else {
-
-      }
+    //选择请假原因
+    chooseBjyy(data,index) {
+      this.$set(this.bjyyChecked, index, !this.bjyyChecked[index]);
     },
     //症状初始化
     checkZZ(data){
@@ -315,6 +327,24 @@ export default {
         }
       }
       this.zzbh=data.join(",")
+    },
+    //得到请假原因
+    getQjyybh(){
+      let arr = [];
+      for (let [i, v] of this.bjyy.entries()) {
+        if (this.bjyyChecked[i]) {
+          arr.push(v);
+        }
+      }
+      this.checkBjyy(arr)
+    },
+    checkBjyy(data){
+      for(let i=0;i<data.length;i++){
+        if(data[i]=='其他'){
+          data[i]='其他-'+this.saveData.qqyyqt
+        }
+      }
+     this.saveData.qtyy=data.join(",")
     },
     getZz() {
       let arr = [];
@@ -362,6 +392,7 @@ export default {
     },
     submitBj(data) {
       this.getZz()
+      this.getQjyybh()
       let param  = {
         //qjlx:'2',
         //qqksrq: this.saveData.ksrq,
@@ -384,8 +415,13 @@ export default {
       if(param.tw&&!this.checkTwisNormal(param.tw)){
         return 
       }
+      //判断是否有请假原因
+      if(!param.qqyy){
+        this.$toast("缺勤原因至少选一项！")
+        return 
+      }
       param = Object.assign(param, data)
-      //console.log(JSON.stringify(param))
+      console.log(JSON.stringify(param))
       this.api.saveZZByTeacher(param).then(res => {
         if(res.code==1){
           this.$toast('保存成功!')
@@ -399,6 +435,7 @@ export default {
     },
     submitSj(data) {
       this.getZz()
+      this.getQjyybh()
       let param  = {
         //qjlx:'1',
         qjsy: this.saveData.qjyynr,
@@ -413,6 +450,11 @@ export default {
         //shms:'同意'
       }
       param = Object.assign(param, data);
+      //判断是否有请假原因
+      if(!param.qqyy){
+        this.$toast("缺勤原因至少选一项！")
+        return 
+      }
       console.log(JSON.stringify(param))
       this.api.saveZZByTeacher(param).then(res => {
         if(res.code==1){

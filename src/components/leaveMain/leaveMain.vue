@@ -1,16 +1,26 @@
 
 <template>
   <div>
-    <mt-header title="请假记录">
+    <!-- <mt-header title="请假记录">
       <a @click="toBack" slot="left">
         <mt-button slot="left" icon="back">返回</mt-button>
       </a>
       <div class="icon-left" slot="right" @click="add" v-if="childs.length>0">
-          <icon  name="add" scale="2"></icon>
+          <icon name="add" scale="2"></icon>
       </div>
-    </mt-header>
+    </mt-header> -->
+    <div class="header">
+      <div class="back" @click="toBack">
+        <icon name="back" scale="2"></icon>
+        <div style="display:inline-block;height:40px;">返回</div>  
+      </div>
+      <div class="title">请假记录</div>
+      <div class="add" @click="add" v-if="childs.length>0">
+        <icon name="add" scale="2"></icon>
+      </div>
+    </div>
     <div style="display:flex;width:100%;height:150px;background:url('./static/img/bj.png');
-      background-size:cover;padding-top:25px;box-sizing:border-box;padding-left:25px">
+      background-size:contain;padding-top:25px;box-sizing:border-box;padding-left:25px">
       <div style="width:50px;height:50px" v-if="childs.length>0">
         <img style="width:100%;height:100%" src="../../../static/img/avator.png" alt="">
       </div>
@@ -254,6 +264,47 @@ export default {
 </script>
 
 <style  scoped>
+.header{
+  width:100%;
+  height:40px;
+  background: #26A2FF;
+  display: flex;
+  line-height:40px;
+  font-size:14px;
+  color:#fff;
+  
+}
+.header .back{
+  width:20%;
+  height:100%;
+  line-height: 40px;
+  display:flex;
+}
+.header .back>svg{
+  width:14px;
+  height:14px;
+  margin-top:13px;
+  margin-left:10px;
+  margin-right:2px;
+}
+.header .title{
+  width:60%;
+  height:100%;
+  line-height: 40px;
+  text-align: center;
+}
+.header .add{
+  width:20%;
+  height:100%;
+  line-height: 40px;
+}
+.header .add>svg{
+  width:16px;
+  height:16px;
+  margin-top:12px;
+  margin-left:calc(70% - 10px);
+  
+}
 .contain {
   background: #f0efed;
   height: calc(100% - 190px);

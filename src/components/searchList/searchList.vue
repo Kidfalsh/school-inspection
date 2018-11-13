@@ -94,7 +94,7 @@ export default {
   created() {
     // this.initIconScale();
     this.xxid = getLocal('xxjg')
-    console.log(this.xxid)
+    //console.log(this.xxid)
     this.newList=[]
     this.newList = this.data.slice();
     if(this.kind=='jg'){
