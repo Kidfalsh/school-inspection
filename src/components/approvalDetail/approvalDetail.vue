@@ -163,7 +163,6 @@ export default {
     if (query.look) {
       this.look = true;
     }
-    console.log(this.childData)
     this.init(this.childData)
   },
   mounted() {
@@ -183,7 +182,7 @@ export default {
         this.qjdata.qjlx=data.qqlx_text
         this.qjdata.qjrq=data.tbrq   
         this.qjdata.qjts=data.qqts
-        this.qjdata.qjyy=data.qqyy
+        //this.qjdata.qjyy=data.qqyy
         this.qjdata.fbrq=data.fbrq
         this.qjdata.sfjz=(data.sfjz=='0'?'否':'是')
         this.qjdata.qtzz=data.qtzz
@@ -204,15 +203,43 @@ export default {
         }
         data.zyzz_text&&(this.qjdata.zz=data.zyzz_text.split(","))
         //初始化-请假原因
-        data.qqyy&&(this.qjdata.qjyy=data.qqyy.split(","))
-        for(let i =0;i<this.qjdata.qjyy.length;i++){
-          if(this.qjdata.qjyy[i].indexOf("其他-")!='-1'){
-            this.qjdata.bjyyqt = this.qjdata.qjyy[i].split("其他-")[1]
-            this.qjdata.qjyy[i] = this.qjdata.qjyy[i].split("-")[0]
+        //先把其他分割出来
+        let qjyy = []
+        if(data.qqyy&&data.qqyy.indexOf("其他-")!='-1'){
+          this.qjdata.bjyyqt = data.qqyy.split("-")[1]
+          qjyy = data.qqyy.split("-")[0]
+          qjyy=qjyy.split("||")
+          this.qjdata.qjyy=[]
+          for(let i =0;i<qjyy.length;i++){
+            this.qjdata.qjyy[i] = qjyy[i]
+          }
+        }else if(data.qqyy&&data.qqyy.indexOf("||")!='-1'){
+          data.qqyy&&(this.qjdata.qjyy=data.qqyy.split("||"))
+          for(let i =0;i<qjyy.length;i++){
+            this.qjdata.qjyy[i] = qjyy[i]
+          }
+        }else{
+          this.qjdata.qjyy = []
+          if(data.qqyy=='感冒'){this.qjdata.qjyy[0] = '感冒'}
+          else if(data.qqyy=='气管炎/肺炎'){this.qjdata.qjyy[0] = '气管炎/肺炎'}
+          else if(data.qqyy=='胃肠道疾病'){this.qjdata.qjyy[0] = '胃肠道疾病'}
+          else if(data.qqyy=='心脏病'){this.qjdata.qjyy[0] = '心脏病'}
+          else if(data.qqyy=='眼病'){this.qjdata.qjyy[0] = '眼病'}
+          else if(data.qqyy=='牙病'){this.qjdata.qjyy[0] = '牙病'}
+          else if(data.qqyy=='耳鼻喉疾病'){this.qjdata.qjyy[0] = '耳鼻喉疾病'}
+          else if(data.qqyy=='泌尿系疾病'){this.qjdata.qjyy[0] = '泌尿系疾病'}
+          else if(data.qqyy=='神经衰弱'){this.qjdata.qjyy[0] = '神经衰弱'}
+          else if(data.qqyy=='意外伤害'){this.qjdata.qjyy[0] = '意外伤害'}
+          else if(data.qqyy=='结核'){this.qjdata.qjyy[0] = '结核'}
+          else if(data.qqyy=='肝炎'){this.qjdata.qjyy[0] = '肝炎'}
+          else if(data.qqyy=='其他传染病'){this.qjdata.qjyy[0] = '其他传染病'}
+          else if(data.qqyy=='病因不明'){this.qjdata.qjyy[0] = '病因不明'}
+          else{
+            this.qjdata.qjyy[0] = '其他'
+            this.qjdata.bjyyqt = data.qqyy
           }
         }
       }
-      //data.zyzz_text&&(this.setZz(data.zyzz_text.split(",")))
     },
     //从缓存或者数据中拿到症状 赋值上去
     setZz(data){

@@ -296,7 +296,13 @@ export default {
     },
     //选择请假原因
     chooseBjyy(data,index) {
-      this.$set(this.bjyyChecked, index, !this.bjyyChecked[index]);
+      //如果是事假强制选择其他
+      if(this.saveData.qqyy=='事假'){
+        this.bjyyChecked[14] = true
+        return 
+      }else{
+        this.$set(this.bjyyChecked, index, !this.bjyyChecked[index]);
+      }
     },
     //症状初始化
     checkZZ(data){
@@ -338,13 +344,17 @@ export default {
       }
       this.checkBjyy(arr)
     },
-    checkBjyy(data){
+    checkBjyy(data){ 
       for(let i=0;i<data.length;i++){
         if(data[i]=='其他'){
-          data[i]='其他-'+this.saveData.qqyyqt
+          if(this.saveData.qqyyqt){
+            data[i]='其他-'+this.saveData.qqyyqt
+          }else{
+            data[i]='其他'
+          }
         }
       }
-     this.saveData.qtyy=data.join(",")
+     this.saveData.qtyy=data.join("||")
     },
     getZz() {
       let arr = [];
@@ -532,9 +542,10 @@ export default {
   overflow: scroll;
   width: 100%;
   padding-bottom: 50px;
+  -webkit-overflow-scrolling: touch;
 }
 .wrap {
-  min-height: 45px;
+  /* min-height: 45px; */
   margin-top: 7.5px;
   background: #fff;
 }
@@ -542,7 +553,7 @@ export default {
   min-height: 140px;
 }
 .footer {
-  position: absolute;
+  position: fixed;
   width: 100%;
   bottom: 0;
   height: 56px;

@@ -167,8 +167,9 @@ export default {
         bjmc:"",
         xxmc:"",
         sfqq: "否",
-        qqyy: "",
-        qtyy: "",
+        qqyy: "", //缺勤类型
+        qqyyqt:"",//缺勤原因其他
+        qtyy: "", //缺勤原因
         //ksrq: new Date().toLocaleDateString(), 
         ksrq:this.getLocalTime(new Date()), 
         fbrq: /* new Date().toLocaleDateString() */'',
@@ -219,6 +220,8 @@ export default {
         this.saveData.zyzz=''
         this.saveData.qtzz=''
         this.zzCheckd=[]
+        this.bjyyChecked = []
+        this.bjyyChecked[14]=true 
       }
     },
     'saveData.sfjz':function(val){
@@ -262,7 +265,44 @@ export default {
           data.jbzd&&(this.saveData.yszd = data.jbzd)
           data.tw&&(this.saveData.tw = parseFloat(data.tw).toFixed(1))
           data.jzyy&&(this.saveData.jzyy = data.jzyy)
-          data.qqyy&&(this.setBjyy(data.qqyy.split(",")))
+          //缺勤原因
+          //先把其他分割出来
+          //console.log(data.qqyy)
+          if(data.qqyy&&data.qqyy.indexOf("其他-")!='-1'){
+            this.bjyyChecked[14] = true
+            this.saveData.qqyyqt = data.qqyy.split("-")[1]
+            this.saveData.qtyy=data.qqyy.split("-")[0]
+            this.setBjyy(this.saveData.qtyy.split("||"))
+          }else if(data.qqyy&&data.qqyy.indexOf("||")!='-1'){
+            this.bjyyChecked[14] = false
+            data.qqyy&&(this.saveData.qtyy=data.qqyy.split("||"))
+            data.qqyy&&(this.setBjyy(this.saveData.qtyy))
+          }else if(data.qqyy){
+            this.bjyyChecked[14] = false
+            if(data.qqyy=='感冒'){this.bjyyChecked[0] = true}
+            else if(data.qqyy=='气管炎/肺炎'){this.bjyyChecked[1] = true}
+            else if(data.qqyy=='胃肠道疾病'){this.bjyyChecked[2] = true}
+            else if(data.qqyy=='心脏病'){this.bjyyChecked[3] = true}
+            else if(data.qqyy=='眼病'){this.bjyyChecked[4] = true}
+            else if(data.qqyy=='牙病'){this.bjyyChecked[5] = true}
+            else if(data.qqyy=='耳鼻喉疾病'){this.bjyyChecked[6] = true}
+            else if(data.qqyy=='泌尿系疾病'){this.bjyyChecked[7] = true}
+            else if(data.qqyy=='神经衰弱'){this.bjyyChecked[8] = true}
+            else if(data.qqyy=='意外伤害'){this.bjyyChecked[9] = true}
+            else if(data.qqyy=='结核'){this.bjyyChecked[10] = true}
+            else if(data.qqyy=='肝炎'){this.bjyyChecked[11] = true}
+            else if(data.qqyy=='其他传染病'){this.bjyyChecked[12] = true}
+            else if(data.qqyy=='病因不明'){this.bjyyChecked[13] = true}
+            else{
+              this.bjyyChecked[14] = true
+              if(data.qqyy=='其他'){
+                this.saveData.qjyyqt=''
+              }else{
+                this.saveData.qjyyqt=data.qqyy
+              }
+            }
+            
+          }
         }
       })
     },
@@ -326,9 +366,8 @@ export default {
           this.bjyyChecked[12]=true
         }if(data[i]=="病因不明"){
           this.bjyyChecked[13]=true
-        }if(data[i].indexOf("其他")!='-1'){
+        }if(data[i]=="其他"){
           this.bjyyChecked[14]=true
-          this.saveData.qqyyqt = data[i].split("其他-")[1]
         }
       }
     },
@@ -347,6 +386,9 @@ export default {
     },
     chooseQqyy(data) {
       this.saveData.qqyy = data.name;
+      if(this.saveData.qqyy=='病假'){
+        this.bjyyChecked=[] 
+      }
     },
     chooseSfqq(data) {
       this.saveData.sfqq = data.name;
@@ -390,7 +432,13 @@ export default {
     },
     //选择请假原因
     chooseBjyy(data,index) {
-      this.$set(this.bjyyChecked, index, !this.bjyyChecked[index]);
+      //如果是事假强制只能选择其他
+      if(this.saveData.qqyy=='事假'){
+        this.bjyyChecked[14] = true
+        return 
+      }else{
+        this.$set(this.bjyyChecked, index, !this.bjyyChecked[index]);
+      }
     },
     //症状初始化
     checkZZ(data){
@@ -435,10 +483,14 @@ export default {
     checkBjyy(data){
       for(let i=0;i<data.length;i++){
         if(data[i]=='其他'){
-          data[i]='其他-'+this.saveData.qqyyqt
+          if(this.saveData.qqyyqt){
+            data[i]='其他-'+this.saveData.qqyyqt
+          }else{
+            data[i]='其他'
+          }
         }
       }
-     this.saveData.qtyy=data.join(",")
+     this.saveData.qtyy=data.join("||")
     },
     getZz() {
       let arr = [];
@@ -515,6 +567,11 @@ export default {
       if(param.tw&&!this.checkTwisNormal(param.tw)){
         return 
       }
+      //判断是否有请假原因
+      if(!param.qqyy){
+        this.$toast("缺勤原因至少选一项！")
+        return 
+      }
       param = Object.assign(param, data)
       //console.log(JSON.stringify(param))
       this.api.saveZZByTeacher(param).then(res => {
@@ -545,6 +602,11 @@ export default {
         qqyy:this.saveData.qtyy,
       }
       param = Object.assign(param, data);
+      //判断是否有请假原因
+      if(!param.qqyy){
+        this.$toast("缺勤原因至少选一项！")
+        return 
+      }
       //console.log(JSON.stringify(param))
       this.api.saveZZByTeacher(param).then(res => {
         if(res.code==1){

@@ -168,7 +168,7 @@ export default {
       pickerValue: "",
       saveData: {
         id: "",
-        qjyy: "事假",
+        qjyy: "",
         qjyynr: "", //请假原因内容
         qjyyqt:"",//其他请假原因
         ksrq: this.getLocalTime(new Date()),
@@ -235,6 +235,10 @@ export default {
   },
   created() {
     //this.$store.commit('setPageTitle','请假条')
+    //如果是事假  默认选中请假原因的其他 可不写内容
+    if(this.saveData.qjyy=='事假'){
+      this.bjyyChecked[14]=true 
+    }
     let query = this.$route.query
     this.zt = JSON.parse(decodeURI(query.curdata)).zt
     this.cklx = query.cklx
@@ -254,10 +258,7 @@ export default {
     } else {
       this.curChild=JSON.parse(decodeURI(query.curdata))
     }
-    //如果是事假  默认选中请假原因的其他 可不写内容
-    if(this.saveData.qjyy=='事假'){
-      this.bjyyChecked[14]=true 
-    }
+    
   },
   mounted() {
     window.onresize = () => {
@@ -295,9 +296,38 @@ export default {
         data.zyzz_text&&(this.setZz(data.zyzz_text.split(",")))
         data.shms&&(this.bz = data.shms)
         //请假原因
-        data.qqyy&&(this.saveData.qjyynr=data.qqyy.split(","))
-        data.qqyy&&(this.setBjyy(this.saveData.qjyynr))
-        
+        //再处理 其他-
+        if(data.qqyy&&data.qqyy.indexOf("其他-")!='-1'){
+          this.bjyyChecked[14] = true
+          this.saveData.qjyyqt = data.qqyy.split("-")[1]
+          this.saveData.qjyynr=data.qqyy.split("-")[0]
+          this.setBjyy(this.saveData.qjyynr.split("||"))
+        }else if(data.qqyy&&data.qqyy.indexOf("||")!='-1'){
+          data.qqyy&&(this.saveData.qjyynr=data.qqyy.split("||"))
+          data.qqyy&&(this.setBjyy(this.saveData.qjyynr))
+          this.bjyyChecked[14] = false
+        }else if(data.qqyy){
+          this.bjyyChecked[14] = false
+          if(data.qqyy=='感冒'){this.bjyyChecked[0] = true}
+          else if(data.qqyy=='气管炎/肺炎'){this.bjyyChecked[1] = true}
+          else if(data.qqyy=='胃肠道疾病'){this.bjyyChecked[2] = true}
+          else if(data.qqyy=='心脏病'){this.bjyyChecked[3] = true}
+          else if(data.qqyy=='眼病'){this.bjyyChecked[4] = true}
+          else if(data.qqyy=='牙病'){this.bjyyChecked[5] = true}
+          else if(data.qqyy=='耳鼻喉疾病'){this.bjyyChecked[6] = true}
+          else if(data.qqyy=='泌尿系疾病'){this.bjyyChecked[7] = true}
+          else if(data.qqyy=='神经衰弱'){this.bjyyChecked[8] = true}
+          else if(data.qqyy=='意外伤害'){this.bjyyChecked[9] = true}
+          else if(data.qqyy=='结核'){this.bjyyChecked[10] = true}
+          else if(data.qqyy=='肝炎'){this.bjyyChecked[11] = true}
+          else if(data.qqyy=='其他传染病'){this.bjyyChecked[12] = true}
+          else if(data.qqyy=='病因不明'){this.bjyyChecked[13] = true}
+          else{
+            this.bjyyChecked[14] = true
+            this.saveData.qjyyqt=data.qqyy
+          }
+          
+        }
       }
     },
     //获取 本地存储 --未提交的
@@ -346,9 +376,41 @@ export default {
           }
         } 
         this.setZz(zyzz)
-        data.qjyynr&&(this.saveData.qjyynr=data.qjyynr.split(","))
-        data.qjyynr&&(this.setBjyy(this.saveData.qjyynr))
-        this.setBjyy(this.saveData.qjyynr)
+        //再处理 其他-
+        if(data.qjyynr&&data.qjyynr.indexOf("其他-")!='-1'){
+          this.bjyyChecked[14] = true
+          this.saveData.qjyyqt = data.qjyynr.split("-")[1]
+          this.saveData.qjyynr=data.qjyynr.split("-")[0]
+          this.setBjyy(this.saveData.qjyynr.split("||"))
+        }else if(data.qjyynr&&data.qjyynr.indexOf("||")!='-1'){
+          this.bjyyChecked[14] = false
+          data.qjyynr&&(this.saveData.qjyynr=data.qjyynr.split("||"))
+          data.qjyynr&&(this.setBjyy(this.saveData.qjyynr))
+        }else{
+          this.bjyyChecked[14] = false
+          if(data.qjyynr=='感冒'){this.bjyyChecked[0] = true}
+          else if(data.qjyynr=='气管炎/肺炎'){this.bjyyChecked[1] = true}
+          else if(data.qjyynr=='胃肠道疾病'){this.bjyyChecked[2] = true}
+          else if(data.qjyynr=='心脏病'){this.bjyyChecked[3] = true}
+          else if(data.qjyynr=='眼病'){this.bjyyChecked[4] = true}
+          else if(data.qjyynr=='牙病'){this.bjyyChecked[5] = true}
+          else if(data.qjyynr=='耳鼻喉疾病'){this.bjyyChecked[6] = true}
+          else if(data.qjyynr=='泌尿系疾病'){this.bjyyChecked[7] = true}
+          else if(data.qjyynr=='神经衰弱'){this.bjyyChecked[8] = true}
+          else if(data.qjyynr=='意外伤害'){this.bjyyChecked[9] = true}
+          else if(data.qjyynr=='结核'){this.bjyyChecked[10] = true}
+          else if(data.qjyynr=='肝炎'){this.bjyyChecked[11] = true}
+          else if(data.qjyynr=='其他传染病'){this.bjyyChecked[12] = true}
+          else if(data.qjyynr=='病因不明'){this.bjyyChecked[13] = true}
+          else{
+            this.bjyyChecked[14] = true
+            if(data.qqyy=='其他'){
+              this.saveData.qjyyqt=''
+            }else{
+              this.saveData.qjyyqt=data.qqyy
+            }
+          }
+        }
       } 
     },
     //从缓存或者数据中拿到症状 赋值上去
@@ -383,8 +445,6 @@ export default {
     //从数据中拿到症状 赋值到请假原因上
     setBjyy(data){
       for(let i=0;i<data.length;i++){
-        this.bjyyChecked[14] = true 
-        this.saveData.qjyyqt = data[i]
         if(data[i]=="感冒"){
           this.bjyyChecked[0]=true
         }if(data[i]=="气管炎/肺炎"){
@@ -413,14 +473,16 @@ export default {
           this.bjyyChecked[12]=true
         }if(data[i]=="病因不明"){
           this.bjyyChecked[13]=true
-        }if(data[i].indexOf("其他")!='-1'){
+        }if(data[i]=="其他"){
           this.bjyyChecked[14]=true
-          this.saveData.qjyyqt = data[i].split("其他-")[1]
         }
       }
     },
     chooseQjlx(data) {
       this.saveData.qjyy = data.name;
+      if(this.saveData.qjyy=='病假'){
+        this.bjyyChecked=[] 
+      }
     },
     chooseSfjz(data) {
       this.saveData.sfjz = data.name;
@@ -475,7 +537,13 @@ export default {
       if(this.look){
         return 
       }
-      this.$set(this.bjyyChecked, index, !this.bjyyChecked[index]);
+      //如果是事假强制选择其他
+      if(this.saveData.qjyy=='事假'){
+        this.bjyyChecked[14] = true
+        return 
+      }else{
+        this.$set(this.bjyyChecked, index, !this.bjyyChecked[index]);
+      }
     },
     setPos(e) {
       let pos = e.target.getBoundingClientRect();
@@ -531,8 +599,10 @@ export default {
       }
       if (this.saveData.qjyy == '病假') {
         this.submitBj(param);
-      } else {
+      } else if(this.saveData.qjyy == '事假') {
         this.submitSj(param);
+      }else{
+        this.$toast('选择请假类型！')
       }
     },
     //得到症状标号
@@ -588,10 +658,14 @@ export default {
     checkBjyy(data){
       for(let i=0;i<data.length;i++){
         if(data[i]=='其他'){
-          data[i]='其他-'+this.saveData.qjyyqt
+          if(this.saveData.qjyyqt){
+            data[i]='其他-'+this.saveData.qjyyqt
+          }else{
+            data[i]='其他'
+          }
         }
       }
-     this.saveData.qjyynr=data.join(",")
+     this.saveData.qjyynr=data.join("||")
     },
     //检验体温是否在填写的正常范围内
     checkTwisNormal(tw){
@@ -619,6 +693,7 @@ export default {
         qqts: this.saveData.qjts,
         fbrq:this.saveData.fbrq,
         sfjz:this.saveData.sfjz=='是'?'1':'0',
+        //sfjz:(this.saveData.sfjz=='是'?'1':'0')||'',
         zyzz:this.zzbh,
         qtzz:this.saveData.qtzz,
         jbzd:this.saveData.yszd,
@@ -680,6 +755,11 @@ export default {
       }
       if(!param.qqts){
         this.$toast("请假天数不能为空！")
+        return 
+      }
+      //判断是否有请假原因
+      if(!param.qqyy){
+        this.$toast("请假原因至少选一项！")
         return 
       }
       param = Object.assign(param, data);
