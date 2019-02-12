@@ -1,7 +1,6 @@
 [{
   "rootUrl": "http://172.16.110.40:8081/xsjkjhapi",
   "imgUrl": "http://172.16.110.40:8081/xsjkjhapi",
-  "htmlUrl": "http://172.16.110.40:8081/htmldata",
-  "devMode": "false",
-  "version": "1"
-}]
+  "htmlUrl": "http://172.16.110.40:8081/htmldata"
+},
+]

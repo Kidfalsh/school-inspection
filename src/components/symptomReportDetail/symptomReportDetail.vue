@@ -40,7 +40,8 @@
           <div class="desc">请假天数</div>
           <input @focus="setPos" v-model="saveData.qjts"  type="number" placeholder="请输入天数">
         </div> -->
-        <div class="form-itme"  @click="choosePicker('ksrq')">
+        <!-- <div class="form-itme"  @click="choosePicker('ksrq')"> -->
+        <div class="form-itme" >    <!--填报日期不能修改--> 
           <div class="desc">填报日期</div>
           <div class="content" style="flex:1;text-align:right">{{saveData.ksrq||'请选择'}}</div>
           <div class="icon" style="width:45px;height:25px">
@@ -59,7 +60,7 @@
         </div> 
         <div class="form-itme" v-if="bjyyChecked[14]">
           <div class="desc">其他原因</div>
-          <input v-model="saveData.qqyyqt"  @focus="setPos"  type="text" placeholder="请输入其他原因">
+          <input v-model="saveData.qqyyqt"  @focus="setPos" @blur="setBack" type="text" placeholder="请输入其他原因">
         </div>
       </div>
       <div class="wrap symptom" v-if="(saveData.sfqq=='是'&&saveData.qqyy!='事假')||saveData.sfqq=='否'">
@@ -80,11 +81,11 @@
         <!-- 就诊医院 -->
         <div class="form-itme" v-if="saveData.sfjz=='是'">
           <div class="desc">就诊医院</div>
-          <input v-model="saveData.jzyy"  @focus="setPos"  type="text" placeholder="请输入就诊医院">
+          <input v-model="saveData.jzyy"  @focus="setPos" @blur="setBack" type="text" placeholder="请输入就诊医院">
         </div>
         <div class="form-itme" v-if="saveData.sfjz=='是'">
           <div class="desc">医生诊断</div>
-          <input v-model="saveData.yszd"  @focus="setPos"  type="text" placeholder="请输入医生诊断">
+          <input v-model="saveData.yszd"  @focus="setPos" @blur="setBack"  type="text" placeholder="请输入医生诊断">
         </div>
         <div>
           <p style="color:#666;text-align:left;padding-left:15px;margin-bottom:10px">主要症状</p>
@@ -95,7 +96,7 @@
         <!-- 配置体温 -->
         <div class="form-itme" v-if="zzCheckd[0]">
           <div class="desc">体温</div>
-          <input v-model="saveData.tw" @focus="setPos" style="padding-right:5px;" type="number" placeholder="请输入体温">
+          <input v-model="saveData.tw" @focus="setPos" @blur="setBack" style="padding-right:5px;" type="number" placeholder="请输入体温">
           <div class="icon" style="width:45px;height:25px;line-height:25px;">
             ℃
           </div>
@@ -103,7 +104,7 @@
         <!-- <div> -->
         <div v-if="zzCheckd[7]" class="form-itme">
           <div class="desc">其他症状</div>
-          <input v-model="saveData.qtzz"  @focus="setPos"  type="text" placeholder="请输入其他症状">
+          <input v-model="saveData.qtzz"  @focus="setPos" @blur="setBack"  type="text" placeholder="请输入其他症状">
         </div>
         <!-- </div> -->
       </div>
@@ -431,7 +432,7 @@ export default {
       this.$set(this.zzCheckd, index, !this.zzCheckd[index]);
     },
     //选择请假原因
-    chooseBjyy(data,index) {
+    chooseBjyy(data,index){
       //如果是事假强制只能选择其他
       if(this.saveData.qqyy=='事假'){
         this.bjyyChecked[14] = true
@@ -504,6 +505,23 @@ export default {
     setPos(e) {
       let pos = e.target.getBoundingClientRect();
       this.focus_top = pos.top;
+    },
+    //设置软键盘顶起来后不退回的问题
+    setBack(e){
+      var u = navigator.userAgent;
+      var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+      if(isiOS){
+        var currentPosition,timer;
+        var speed=1;//页面滚动距离
+        timer=setInterval(function(){
+          currentPosition=document.documentElement.scrollTop || document.body.scrollTop;
+          currentPosition-=speed; 
+          window.scrollTo(0,currentPosition);//页面向上滚动
+          currentPosition+=speed; //speed变量
+          window.scrollTo(0,currentPosition);//页面向下滚动
+          clearInterval(timer);
+        });
+      }
     },
     confirm() {
       let ryxx = this.$store.getters.userInfo.ryxx

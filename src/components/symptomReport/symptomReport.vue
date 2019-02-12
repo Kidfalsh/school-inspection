@@ -7,7 +7,10 @@
     </div>
     <div class="search" @click="showBj">
       <div style="margin-left:20px;width:80px;font-size:16px;text-align:center">{{selectClass.name?selectClass.name:"暂无班级"}}</div>
-      <div style="flex:1"><icon style="color:#666;height:80%;width:20px" name="down"></icon></div>
+      <div style="flex:1">
+        <icon style="color:#666;height:80%;width:20px" name="down"></icon>
+        <!-- <input type="text"> -->
+      </div>
       <div style="width:25px;height:20px;margin-right:15px"><icon style="color:#666;height:100%;width:100%" name="search"></icon></div>
       <div v-if="classShow" class="bjlistshow" >
         <list @selectItem="selectBj" :data="bjList"></list>

@@ -3,12 +3,14 @@
   <div class="wrap">
     <div style="height:75px;width:75px;margin:35px auto">
       <img style="width:100%;height:100%" src="../../../static/img/login.png" alt="">
+      <!-- <img v-if="isTeacher" style="width:100%;height:100%" src="../../../static/img/teacher.png" alt="">
+      <img v-if="!isTeacher" style="width:100%;height:100%" src="../../../static/img/parent.png" alt=""> -->
     </div>
     <div class="form">
       <div class="form-item" v-if="isTeacher" @click.prevent="showJgxz">
         <icon style="color:#333;height:40px;width:18px;margin-right:5px;"  name="jigou1"></icon>
         <!-- <input v-model="userInfo.jgmc" autocomplete="off" placeholder="请选择学校" type="text"> -->
-        <div style="">{{mechanism.jgid?mechanism.jgmc:'请选择学校'}}</div>
+        <div style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">{{mechanism.jgid?mechanism.jgmc:'请选择学校'}}</div>
         <!-- <icon style=""  name="Arrow-right"></icon> -->
       </div>
       <div class="form-item" v-if="isTeacher" @click.stop="showRyxz">
@@ -18,11 +20,11 @@
       </div>
       <div class="form-item" v-if="!isTeacher">
         <icon style="color:#333;height:45px;width:18px;"  name="user"></icon>
-        <input v-model="userInfo.username" autocomplete="off" placeholder="请输入用户名" type="text">
+        <input v-model="userInfo.username" @blur="setBack" autocomplete="off" placeholder="请输入用户名" type="text">
       </div>
       <div class="form-item" >
         <icon style="color:#333;height:45px;width:18px;" name="password"></icon>
-        <input v-model="userInfo.password" autocomplete="off" placeholder="请输入密码" type="password">
+        <input v-model="userInfo.password" @blur="setBack" autocomplete="off" placeholder="请输入密码" type="password">
       </div>
       <div class="btn-wrap"> 
         <div class="login_btn" @click.stop="submit"> 登&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;录</div>
@@ -228,6 +230,23 @@ export default {
       this.isShow = false;
       this.rylistShow = false;
       this.userInfo.username = data.yhm //用户名 
+    },
+    //设置软键盘顶起来后不退回的问题
+    setBack(e){
+      var u = navigator.userAgent;
+      var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+      if(isiOS){
+        var currentPosition,timer;
+        var speed=1;//页面滚动距离
+        timer=setInterval(function(){
+          currentPosition=document.documentElement.scrollTop || document.body.scrollTop;
+          currentPosition-=speed; 
+          window.scrollTo(0,currentPosition);//页面向上滚动
+          currentPosition+=speed; //speed变量
+          window.scrollTo(0,currentPosition);//页面向下滚动
+          clearInterval(timer);
+        });
+      }
     },
   },
   components: {searchList,singleSelect}

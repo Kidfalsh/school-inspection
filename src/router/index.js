@@ -56,6 +56,18 @@ const changePassword = resolve => {
 const forgetPassword = resolve => {
   require(['../components/forgetPassword/forgetPassword.vue'], resolve)
 };
+const warningPrediction = resolve => {
+  require(['../components/warningPrediction/warningPrediction.vue'], resolve)
+};
+const test = resolve => {
+  require(['../components/test/test.vue'], resolve)
+};
+const warningDetail = resolve => {
+  require(['../components/warningDetail/warningDetail.vue'], resolve)
+};
+const warningCheck = resolve => {
+  require(['../components/warningDetail/warningCheck.vue'], resolve)
+};
 // auto add components
 
 export const CommonRoutes = [{
@@ -163,7 +175,28 @@ export const AsyncRoutes = [{
       name: 'forgetPassword',
       path: '/index/forgetPassword',
       component: forgetPassword
-    },// auto add routePath
+    },
+    {
+      name: 'warningPrediction',
+      path: '/index/warningPrediction',
+      component: warningPrediction
+    },
+    {
+      name: 'warningDetail',
+      path: '/index/warningDetail',
+      component: warningDetail
+    },
+    {
+      name: 'warningCheck',
+      path: '/index/warningCheck',
+      component: warningCheck
+    },
+    {
+      name: 'test',
+      path: '/index/test',
+      component: test
+    },
+    // auto add routePath
     { path: '*', redirect: '/index' }
 ]
 

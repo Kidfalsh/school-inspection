@@ -1,8 +1,15 @@
 
 <template>
-  <div class="test">
+  <div class="test" ref="test">
     <my-header :title="'请假审批'"></my-header>
-    
+    <div class="mes">
+      <div v-for="item,index in mesArr" 
+        :key="index" 
+        :class="{active:item.index==1}"
+        @click="changeZt(item,index)">
+        {{item.name}}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -12,35 +19,26 @@ import myHeader from "@/components/header/header.vue";
 export default {
   data() {
     return {
+      mesArr:[
+        {name:'已处理',index:0},
+        {name:'未处理',index:0},
+      ]
     }
   },
   computed: {},
   created() {
-    this.$store.commit('setPageTitle','请假审批')
-
+    this.$store.commit('setPageTitle','test')
   },
   mounted() {
-    this.changeArr([1,2,3,4])
-    this.isObjArr([1,2])
+    this.$set(this.mesArr[0],'index','1')
+    // this.mesArr[0].index=1
   },
   methods: {
-    changeArr(arr){
-      if(arr instanceof Array){
-        arr.fill('7')
-        this.$toast(""+arr)
-      }else{
-        this.$toast('该变量不为数组')
-        console.log(this)
-      }
-    },
-    isObjArr(value){
-      if (Object.prototype.toString.call(value) === "[object Array]") {
-        console.log('value是数组')
-      }else if(Object.prototype.toString.call(value)==='[object Object]'){//这个方法兼容性好一点
-        console.log('value是对象')
-      }else{
-        console.log('value不是数组也不是对象')
-      }
+    changeZt(item,index){
+      this.mesArr.forEach(temp=>{
+        temp.index=0
+      })
+      this.$set(item,'index','1')
     }
   },
   components: {
@@ -50,6 +48,46 @@ export default {
 </script>
 
 <style  scoped lang='less'>
-  
-  
+  .test{
+    width:100%;
+    height:100%;
+    background: #ddd;
+    .mes{
+      width:100%;
+      height: 40px;
+      line-height: 40px;
+      background: #fff;
+      display:flex;
+      div{
+        width:50%;
+        text-align: center;
+        font-size:16px;
+      }
+    }
+    &:after{
+      height:1px;content:"";
+      width:100%;
+      border-bottom:1px solid #ddd;
+      position:absolute;
+      bottom:-1px;
+      left:0;
+      transform:scaleY(0.5);
+      -webkit-transform:scaleY(0.5);
+    }
+  }
+  .active{
+    color:#00b678;
+    position:relative;
+  } 
+  .active:after{
+    content:"";
+    width:100%;
+    height:4px;
+    border-bottom:4px solid #00b678;
+    position:absolute;
+    bottom:-2px;
+    left: 0;
+    transform:scaleY(0.5);
+    -webkit-transform:scaleY(0.5);
+  } 
 </style>

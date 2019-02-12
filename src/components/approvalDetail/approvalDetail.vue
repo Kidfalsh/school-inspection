@@ -84,7 +84,7 @@
       <div style="margin:10px 0;height:40px;background:#fff">
         <div class="form-itme">
           <div class="desc">老师反馈</div>
-          <input v-model="bz"  @focus="setPos" :readonly="bz.length<=0&&'readonly'" type="text" placeholder="请输入反馈信息" @click.stop="showSheet1">
+          <input v-model="bz"  @focus="setPos" @blur="setBack" :readonly="bz.length<=0&&'readonly'" type="text" placeholder="请输入反馈信息" @click.stop="showSheet1">
         </div>
       </div>
     </div>
@@ -309,6 +309,23 @@ export default {
       e.preventDefault()
       let pos = e.target.getBoundingClientRect();
       this.focus_top = pos.top;
+    },
+    //设置软键盘顶起来后不退回的问题
+    setBack(e){
+      var u = navigator.userAgent;
+      var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+      if(isiOS){
+        var currentPosition,timer;
+        var speed=1;//页面滚动距离
+        timer=setInterval(function(){
+          currentPosition=document.documentElement.scrollTop || document.body.scrollTop;
+          currentPosition-=speed; 
+          window.scrollTo(0,currentPosition);//页面向上滚动
+          currentPosition+=speed; //speed变量
+          window.scrollTo(0,currentPosition);//页面向下滚动
+          clearInterval(timer);
+        });
+      }
     },
     //准假
     confirm() {

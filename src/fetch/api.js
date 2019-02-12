@@ -167,4 +167,24 @@ export default {
   getYljgRy(params) {
     return fetch('/rest/queryDataBySql/020303/02', params)
   },
+  //获取预警提醒右上角信息
+  getYjtx(params) {
+    return fetch('/rest/queryDataBySql/020401/01', params)
+  },
+  //通过预警id获取预警信息详情
+  getYjxxByyjid(params) {
+    return fetch('/rest/queryDataBySql/020401/03', params)
+  },
+  //通过预警id获取预警信息详情 --已处理的数据
+  getYjxqByyjid(params) {
+    return fetch('/rest/queryDataBySql/020401/04', params)
+  },
+  //根据字典分类查询通用字典
+  checkTyzd(params){
+    return fetch('/rest/queryDataBySql/000000/01', params)
+  },
+  //保存预警处理
+  saveYjinsert(params) {
+    return fetch('/rest/commitData/020401/01', params)
+  },
 }

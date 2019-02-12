@@ -4,13 +4,13 @@
     <my-header :leftShow="false" :isTeacher="true"></my-header>
     <my-swipe></my-swipe>
     <div class="contain">
-      <div class="contain-item" v-for="item in itemList"  @click="toTarget(item)">
-        <span class="badge" v-if="item.baddge && !!count">{{count}}</span>
+      <div class="contain-item" v-for="item in itemList" v-if="item.show" @click="toTarget(item)">
+        <span class="badge" v-if="item.baddge && !!item.count">{{item.count}}</span>
         <img :src="item.src" alt="">
       </div>
     </div>
     <div class="title">最新知识</div>
-    <div class="article_wrap">
+    <div class="article_wrap" :style="{height:wrapHeight}">
       <div>
           <div class="article_item" v-for="item,index in articles" :key="index" @click.stop="toArticle(item)">
             <div class="package"  v-if="item.zst">
@@ -44,17 +44,19 @@ export default {
       count:'',
       color:[['#d1f5de',"#a5ebbc"],["#fdedcb","#f7d7a9"],["#f9dada","#f7bfbf"]],
       itemList: [
-        { src: "./static/img/t_leave.png", target: "leaveApproval" ,baddge:true },
-        { src: "./static/img/t_approval.png", target: "symptomReport" },
-        { src: "./static/img/t_analysis.png", target: "analysis" },
-        { src: "./static/img/t_museum.png", target: "newsList" },
+        { src: "./static/img/t_leave.png", target: "leaveApproval" ,baddge:true,show:true,count:''},
+        { src: "./static/img/t_approval.png", target: "symptomReport",show:true },
+        { src: "./static/img/t_analysis.png", target: "analysis",show:true },
+        { src: "./static/img/t_museum.png", target: "newsList",show:true },
+        { src: "./static/img/t_yjtx.png", target: "warningPrediction",show:true,baddge:true,count:''},
       ],
       articles: [
         
       ],
       pagesize:100,
       pageNumber:1,
-      zwlb:''
+      zwlb:'',
+      wrapHeight:'calc(100% - 455px) !important'
     };
   },
   computed: {},
@@ -62,8 +64,14 @@ export default {
   created() {
     this.$store.commit('setPageTitle','杭州市学校症状监测系统')
     this.zwlb = this.$store.getters.userInfo.ryxx.zwlb
+    //教师 不会出现预警提醒按钮
+    if(this.zwlb == '002'){
+      this.itemList[4].show=false
+      this.wrapHeight = 'calc(100% - 410px) !important'
+    }
   },
   mounted() {
+    this.loadYjtz()
     this.loadQjjl()
     this.loadArticleList()
   },
@@ -136,6 +144,33 @@ export default {
       this.api.getQjjlByTeacher(params).then(res => {
         if(res.code==1&&res.data.length>0){
           this.count=res.data.length
+          this.itemList[0].count = res.data.length
+        }
+      })
+    },
+    //查询预警提醒
+    loadYjtz(){
+      let ksrq = this.getLocalTime(new Date()) + ' 00:00:00'
+      let jsrq = this.getLocalTime(new Date()) + ' 23:59:59'
+      let bjid = this.$store.getters.userInfo.ryxx.bjid
+      let xxid = this.$store.getters.userInfo.ryxx.xxid
+      let params = {
+        rn_s: this.pagesize * (this.pageNumber - 1) + 1 + "",
+        rn_e: this.pagesize * this.pageNumber + "",
+        xxid:xxid,
+        ksrq:ksrq,
+        jsrq:jsrq,
+      }
+      let arr=[]
+      this.api.getYjtx(params).then(res=>{
+        if(res.code==1&&res.data.length>0){
+          res.data.forEach(item=>{
+            //只满足状态为0的才显示处理
+            if(item.zt==0){
+              arr.push(item)
+            }
+          })
+          this.itemList[4].count = arr.length
         }
       })
     }
@@ -146,10 +181,10 @@ export default {
 
 <style scoped>
 .contain {
-  height: 115px;
+  min-height: 115px;
   border-bottom: 10px solid #f0efed;
   display: flex;
-  justify-content: space-around;
+  /* justify-content: space-around; */
   flex-wrap: wrap;
   align-items: center;
 }
@@ -165,22 +200,22 @@ export default {
 }
 .badge{
   position: absolute;
-  top: 0;
-  right: 10px;
-  width: 20px;
-  height: 20px;
-  line-height: 20px;
+  top: 5px;
+  right: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
   border-radius: 50%;
   text-align: center;
   background: #f44f29;
   color: #fff;
 }
 .contain-item img {
-  width: 60px;
-  height: 80px;
+  width: 45px;
+  height: 60px;
 }
 .article_wrap {
-  height: calc(100% - 400px);
+  height: calc(100% - 455px);
   overflow: scroll;
   padding: 10px;
   -webkit-overflow-scrolling: touch;

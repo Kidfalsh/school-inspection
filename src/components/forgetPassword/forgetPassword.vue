@@ -7,7 +7,7 @@
     <div class="form">
       <div class="form-item">
         <icon style="color:#333;height:45px;width:18px;"  name="user"></icon>
-        <input v-model="userInfo.sjhm" placeholder="请输入注册的手机号" type="text">
+        <input v-model="userInfo.sjhm" @blur="setBack" placeholder="请输入注册的手机号" type="text">
       </div>
       <!-- 手机验证码 -->
       <div class="form-item" style="margin-top:15px">
@@ -15,7 +15,7 @@
           <icon style="color:#333;height:45px;width:18px;" name="code"></icon>
         </div>
         <div>
-           <input style="width:100px" v-model="userInfo.code" placeholder="请输入验证码" type="number">
+           <input style="width:100px" v-model="userInfo.code" @blur="setBack" placeholder="请输入验证码" type="number">
         </div>
         <div style="width:100px;">
           <span class="span_btn" v-if="!isSend" @click.stop="sendCode" style="background-color:#17c095">获取验证码</span>
@@ -24,11 +24,11 @@
       </div>
       <div class="form-item" style="margin-top:15px">
         <icon style="color:#333;height:45px;width:18px;" name="password"></icon>
-        <input v-model="userInfo.password" placeholder="请输入新密码" type="password">
+        <input v-model="userInfo.password" @blur="setBack" placeholder="请输入新密码" type="password">
       </div>
       <div class="form-item" style="margin-top:15px">
         <icon style="color:#333;height:45px;width:18px;" name="password"></icon>
-        <input v-model="userInfo.repeatPassword" placeholder="请确认新密码" type="password">
+        <input v-model="userInfo.repeatPassword" @blur="setBack" placeholder="请确认新密码" type="password">
       </div>
       <div class="btn-wrap"> 
         <div class="register_btn" @click="submit"> 确认</div>
@@ -71,13 +71,14 @@ export default {
   },
   methods: {
     sendCode() {
-        console.log(this.userInfo.sjhm)
+      console.log(this.userInfo.sjhm)
       if (this.userInfo.sjhm.length!= 11 || this.userInfo.sjhm.charAt(0)!= 1) {
         this.$toast('请输入正确的手机号！')
         return;
       }else{
         this.isSend = true;
         let number = this.randomNumber()
+        this.number = number 
         var msg=`您正在使用杭州市学校症状监测系统，修改密码验证码为【${number}】请在15分钟内按页面提示输入验证码，切勿将验证码泄露与他人。`   
         this.nextTime();
         let params={
@@ -85,10 +86,12 @@ export default {
           msg:msg
         }
         params = Base64.encode(JSON.stringify(params))
+        //let url = 'http://172.16.110.166:8080/xsjkjhapi/rest/sendmsg_bd?data='+params
         //获取验证码
         axios({
           method: 'post',
           url: 'http://hzcdc.com.cn:8081/xsjkjhapi/rest/sendmsg_rc?data='+params,
+          //url: 'http://172.16.110.166:8080/xsjkjhapi/rest/sendmsg_bd?data='+params,
         }).then(res=>{
           if(res.data.code==1){
             this.number = number  
@@ -169,7 +172,24 @@ export default {
     submit() {
         if (!this.checkUserInfo())  return;
         this.register();
-    }
+    },
+     //设置软键盘顶起来后不退回的问题
+    setBack(e){
+      var u = navigator.userAgent;
+      var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+      if(isiOS){
+        var currentPosition,timer;
+        var speed=1;//页面滚动距离
+        timer=setInterval(function(){
+          currentPosition=document.documentElement.scrollTop || document.body.scrollTop;
+          currentPosition-=speed; 
+          window.scrollTo(0,currentPosition);//页面向上滚动
+          currentPosition+=speed; //speed变量
+          window.scrollTo(0,currentPosition);//页面向下滚动
+          clearInterval(timer);
+        });
+      }
+    },
   },
   components: {}
 };
